@@ -1,0 +1,6 @@
+item,n
+LMIC countries in 204_with_LMIC.csv (LMIC==1),128
+  ... with matched 2023 World Bank GDP (PPP),122
+  ... also with sex-specific 2023 HALE (analysed),122
+Countries excluded for missing GDP,6
+Countries excluded for missing HALE,0
