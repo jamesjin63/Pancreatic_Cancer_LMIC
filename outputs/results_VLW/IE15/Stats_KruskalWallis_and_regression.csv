@@ -1,0 +1,2 @@
+test,H,df,p_value,n,epsilon2,reg_slope_logGDP,reg_p,reg_R2,note
+Kruskal-Wallis VLW/GDP across income groups,84.93120351859255,2,3.609304186303676e-19,122,0.7019107728809302,1.3294570582356378,1.0946453814010408e-41,0.7835136570870378,groups income-defined (descriptive); regression is the non-circular gradient test

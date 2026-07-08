@@ -1,0 +1,7 @@
+Country,Location ID,Income group,World Bank matched name,Reason for exclusion
+Democratic People's Republic of Korea,7,Low income,"Korea, Dem. People's Rep.",Missing 2023 GDP per capita and/or total GDP in World Bank data
+Syrian Arab Republic,153,Low income,Syrian Arab Republic,Missing 2023 GDP per capita and/or total GDP in World Bank data
+South Sudan,435,Low income,South Sudan,Missing 2023 GDP per capita and/or total GDP in World Bank data
+Eritrea,178,Low income,Eritrea,Missing 2023 GDP per capita and/or total GDP in World Bank data
+Cuba,109,Upper middle income,Cuba,Missing 2023 GDP per capita and/or total GDP in World Bank data
+Yemen,157,Low income,"Yemen, Rep.",Missing 2023 GDP per capita and/or total GDP in World Bank data
