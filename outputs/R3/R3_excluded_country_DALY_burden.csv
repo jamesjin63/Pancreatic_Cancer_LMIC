@@ -1,0 +1,8 @@
+location_id,location_name,LMIC_group,DALY,income_group_total_DALYs,percent_of_income_group_DALYs,all_128_LMIC_DALYs,percent_of_all_128_LMIC_DALYs,VLW_status
+7,Democratic People's Republic of Korea,Low income,40230.11682819844,210793.08870067258,19.085121374793005,6560540.221705612,0.6132134773764012,Not estimable because 2023 GDP inputs required for VSL transfer are missing
+109,Cuba,Upper middle income,23921.96771165704,4882247.541198344,0.48997859100330277,6560540.221705612,0.36463411400955936,Not estimable because 2023 GDP inputs required for VSL transfer are missing
+153,Syrian Arab Republic,Low income,12617.951677223266,210793.08870067258,5.985941832818262,6560540.221705612,0.19233098572395985,Not estimable because 2023 GDP inputs required for VSL transfer are missing
+157,Yemen,Low income,8490.565633409135,210793.08870067258,4.027914617953052,6560540.221705612,0.1294186964256086,Not estimable because 2023 GDP inputs required for VSL transfer are missing
+178,Eritrea,Low income,2458.0362857440846,210793.08870067258,1.1660896004206809,6560540.221705612,0.037466979893083306,Not estimable because 2023 GDP inputs required for VSL transfer are missing
+435,South Sudan,Low income,4166.713375749698,210793.08870067258,1.976684056120291,6560540.221705612,0.06351174194411742,Not estimable because 2023 GDP inputs required for VSL transfer are missing
+NA,All six excluded countries,Combined,91885.35151198164,NA,NA,6560540.221705612,1.4005759953727293,Not estimable because 2023 GDP inputs required for VSL transfer are missing

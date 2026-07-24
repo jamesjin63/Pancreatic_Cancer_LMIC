@@ -1,21 +1,21 @@
 ################################################################################
-# LMIC Pancreatic Cancer — Value of Lost Welfare (VLW) Analysis  —  v2 (CONSISTENT)
+# LMIC Pancreatic Cancer — Value of Lost Welfare (VLW) Analysis — R3 CANONICAL WORKFLOW
 # GBD 2023 · 1990-2023 · Forecast to 2050 · IE = 0.5, 1.0, 1.5
 #
-# v2 rewrite addresses reviewer (iScience ISCIENCE-D-26-05974) statistical points:
-#   M1/M2 : ONE consistent VSLY definition (uniform discounted-annuity VSLY).
-#           VSLY_i = VSL_i / annuity(HALE_i, r),  annuity(T,r)=(1-(1+r)^-T)/r
-#           Applied uniformly to every DALY; age/sex/income all aggregate from the
-#           country×sex(×age) level -> Table 4/6 (age) sums EXACTLY to Table 1 total.
-#   M6    : Both-sex = Male + Female (derived by summation, never from Both-HALE).
-#   M3    : reports income-elasticity range (IE 0.5–1.5) ALONGSIDE the DALY-only
-#           95% UI, and relabels the DALY-only interval explicitly.
-#   M4    : Kruskal-Wallis actually run + reported (H, df, p, eps^2) + post-hoc.
-#   M5    : ETS diagnostics (params, AICc, Ljung-Box) saved; all-LMIC total
-#           forecast = SUM of income-group forecasts (reconciles to components).
-#   m2    : discounting via annuity on T_i = HALE_i (explicitly defined); an
-#           undiscounted (r=0) variant is reported as sensitivity.
-#   m3/m4 : sessionInfo + package versions + country-coverage log written out.
+# R3 statistical policies implemented here:
+#   1. Historical marginal GBD bounds are never summed; aggregate historical
+#      uncertainty intervals are not reported without matched draws.
+#   2. DALYs are forecast first, then monetised with fixed 2023 group-specific
+#      effective VSLYs. Direct VLW forecasts are secondary diagnostics only.
+#   3. Every reported forecast interval explicitly uses level = 95.
+#   4. All-LMIC prediction intervals use 50,000 joint paths with empirical
+#      residual correlation; subgroup interval endpoints are never summed.
+#   5. ETS is the primary model and non-seasonal ARIMA is a sensitivity model.
+#   6. The rate panel is the unweighted mean of country-specific ASRs.
+#
+# The workflow also uses one consistent discounted-annuity VSLY definition,
+# derives both-sex values as male + female, reports IE = 0.5/1.0/1.5 valuation
+# scenarios separately from statistical uncertainty, and writes full diagnostics.
 #
 # NOTE: with a uniform VSLY, age-specific VLW is proportional to age-specific
 #       DALYs, so VLW peaks in the SAME band as DALYs (65–69); the previous
@@ -32,15 +32,21 @@ options(warn = -1, dplyr.summarise.inform = FALSE)
 # Reproducibility-package layout: run from reviseR2/code with
 # Rscript scripts/run_LMIC_Pancreatic_VLW_v2.R
 base       <- normalizePath(".")
-daly_file  <- file.path(base, "data_processed/merged.csv")
+daly_dir   <- file.path(base, "data_raw/gbd_daly_yearly")
 hale_file  <- file.path(base, "data_raw/external_metadata/HALE.csv")
 gdp_file   <- file.path(base, "data_raw/external_metadata/gdp.csv")
 lmic_file  <- file.path(base, "data_raw/external_metadata/204_with_LMIC.csv")
 world_file <- file.path(base, "data_raw/external_metadata/df_world2.geojson")
 out_root   <- file.path(base, "outputs/results_VLW")
 diag_dir   <- file.path(out_root, "diagnostics")
+r3_dir     <- file.path(base, "outputs/R3")
+submission_fig_dir <- file.path(base, "outputs/R3_submission_figures")
+submission_table_dir <- file.path(base, "outputs/R3_submission_tables")
 dir.create(out_root, showWarnings = FALSE, recursive = TRUE)
 dir.create(diag_dir, showWarnings = FALSE, recursive = TRUE)
+dir.create(r3_dir, showWarnings = FALSE, recursive = TRUE)
+dir.create(submission_fig_dir, showWarnings = FALSE, recursive = TRUE)
+dir.create(submission_table_dir, showWarnings = FALSE, recursive = TRUE)
 
 # ── Reference constants (USA 2023) ────────────────────────────────────────────
 VSL_USA       <- 13.2e6      # US DOT 2023 VSL
@@ -96,7 +102,7 @@ gbd_to_wb <- c(
   "Somalia"="Somalia, Fed. Rep.","Syrian Arab Republic"="Syrian Arab Republic",
   "Türkiye"="Turkiye","United Republic of Tanzania"="Tanzania","Yemen"="Yemen, Rep.")
 norm_name <- function(x) x %>% str_replace_all("[‘’]","'") %>%
-  str_replace_all(" "," ") %>% iconv(from="UTF-8",to="ASCII//TRANSLIT") %>% str_squish()
+  str_replace_all(" "," ") %>% str_squish() %>% str_to_lower()
 fmt_ui <- function(v,lo,hi,d=1,s=1) paste0(
   formatC(v/s,format="f",digits=d,big.mark=",")," (",
   formatC(lo/s,format="f",digits=d,big.mark=","),"–",
@@ -107,10 +113,13 @@ std_ages <- c("<5 years","5-9 years","10-14 years","15-19 years","20-24 years",
   "50-54 years","55-59 years","60-64 years","65-69 years","70-74 years",
   "75-79 years","80-84 years","85-89 years","90-94 years","95+ years")
 age_mids <- c(2.5,7,12,17,22,27,32,37,42,47,52,57,62,67,72,77,82,87,92,97)
-age_lookup <- tibble(age_name=std_ages, age_mid=age_mids, age_order=seq_along(std_ages))
+age_ids <- c(1,6:20,30:32,235)
+age_lookup <- tibble(age_id=age_ids, age_name=std_ages, age_mid=age_mids,
+                     age_order=seq_along(std_ages))
+sex_lookup <- c(`1`="Male", `2`="Female", `3`="Both")
 
 cat("================================================================\n")
-cat("  Pancreatic LMIC VLW  v2 (consistent)  · IE=0.5/1.0/1.5\n")
+cat("  Pancreatic LMIC VLW  R3 canonical  · IE=0.5/1.0/1.5\n")
 cat("================================================================\n\n")
 
 # ======================================================================
@@ -122,6 +131,9 @@ df_lmic_raw <- read_csv(lmic_file, show_col_types=FALSE)
 df_lmic <- df_lmic_raw %>% filter(LMIC==1) %>%
   select(location_id,location_name,LMIC_group) %>%
   mutate(wb=ifelse(location_name %in% names(gbd_to_wb),gbd_to_wb[location_name],location_name),
+         wb=case_when(location_id==155 ~ "Turkiye",
+                      location_id==205 ~ "Cote d'Ivoire",
+                      TRUE ~ wb),
          wb_n=norm_name(wb))
 
 df_gdp <- read_csv(gdp_file,show_col_types=FALSE) %>%
@@ -132,31 +144,37 @@ df_gdp <- read_csv(gdp_file,show_col_types=FALSE) %>%
 df_econ <- df_lmic %>% left_join(df_gdp,by=c("wb_n"="cn")) %>%
   filter(!is.na(GDP_pc)) %>% select(location_id,location_name,LMIC_group,GDP_pc,GDP_tot)
 lmic_ids <- df_econ$location_id
+stopifnot(nrow(df_lmic)==128L, nrow(df_econ)==122L)
 
 # coverage log (reviewer m4)
 n_lmic_total <- nrow(df_lmic)
 n_with_gdp   <- nrow(df_econ)
 
-df_daly_all <- read_csv(daly_file,show_col_types=FALSE) %>%
-  filter(cause_name=="Pancreatic cancer",
-         measure_name=="DALYs (Disability-Adjusted Life Years)",
-         metric_name=="Number", age_name=="All ages",
-         location_id %in% lmic_ids) %>%
+daly_files <- sort(list.files(daly_dir, pattern="^measure2_DALYs_year[0-9]{4}\\.csv$",
+                              full.names=TRUE))
+stopifnot(length(daly_files) == 34L)
+df_daly_raw <- map_dfr(daly_files, function(f) {
+  read_csv(f, show_col_types=FALSE) %>%
+    filter(measure==2, cause==456, location %in% df_lmic$location_id,
+           sex %in% c(1,2,3), age %in% c(22,27,age_ids), metric %in% c(1,3)) %>%
+    transmute(location_id=location, sex_id=sex, age_id=age, metric_id=metric,
+              year, val, lower, upper)
+}) %>%
+  left_join(df_lmic %>% select(location_id,location_name), by="location_id") %>%
+  mutate(sex_name=unname(sex_lookup[as.character(sex_id)]))
+
+df_daly_all <- df_daly_raw %>%
+  filter(metric_id==1, age_id==22) %>%
   select(location_id,location_name,sex_id,sex_name,year,DALY=val,lower,upper)
 
-df_daly_age <- read_csv(daly_file,show_col_types=FALSE) %>%
-  filter(cause_name=="Pancreatic cancer",
-         measure_name=="DALYs (Disability-Adjusted Life Years)",
-         metric_name=="Number", age_name %in% std_ages,
-         location_id %in% lmic_ids) %>%
-  select(location_id,location_name,sex_id,sex_name,age_name,year,
+df_daly_age <- df_daly_raw %>%
+  filter(metric_id==1, age_id %in% age_ids) %>%
+  left_join(age_lookup, by="age_id") %>%
+  select(location_id,location_name,sex_id,sex_name,age_name,age_mid,age_order,year,
          DALY_age=val,lower_age=lower,upper_age=upper)
 
-df_daly_rate <- read_csv(daly_file,show_col_types=FALSE) %>%
-  filter(cause_name=="Pancreatic cancer",
-         measure_name=="DALYs (Disability-Adjusted Life Years)",
-         metric_name=="Rate", age_name=="Age-standardized",
-         location_id %in% lmic_ids) %>%
+df_daly_rate <- df_daly_raw %>%
+  filter(metric_id==3, age_id==27) %>%
   select(location_id,sex_id,sex_name,year,rate=val,rate_lo=lower,rate_hi=upper)
 
 df_hale_all <- read_csv(hale_file,show_col_types=FALSE) %>%
@@ -197,9 +215,9 @@ compute_allages <- function(ie, r = discount_rate) {
            VLW_u=VSLY_u*DALY/1e9, VLW_u_lo=VSLY_u*lower/1e9, VLW_u_hi=VSLY_u*upper/1e9)
   both <- base %>%
     group_by(location_id,location_name,LMIC_group,GDP_pc,GDP_tot,year) %>%
-    summarise(DALY=sum(DALY),lower=sum(lower),upper=sum(upper),
-              VLW=sum(VLW),VLW_lo=sum(VLW_lo),VLW_hi=sum(VLW_hi),
-              VLW_u=sum(VLW_u),VLW_u_lo=sum(VLW_u_lo),VLW_u_hi=sum(VLW_u_hi),
+    summarise(DALY=sum(DALY),lower=NA_real_,upper=NA_real_,
+              VLW=sum(VLW),VLW_lo=NA_real_,VLW_hi=NA_real_,
+              VLW_u=sum(VLW_u),VLW_u_lo=NA_real_,VLW_u_hi=NA_real_,
               HALE=mean(HALE), .groups="drop") %>%
     mutate(sex_id=3L, sex_name="Both")
   bind_rows(
@@ -216,12 +234,11 @@ compute_age <- function(ie, r = discount_rate) {
   base <- df_daly_age %>% filter(year==2023, sex_id %in% c(1,2)) %>%
     inner_join(df_econ %>% select(location_id,LMIC_group), by="location_id") %>%
     inner_join(vsly, by=c("location_id","sex_id")) %>%
-    left_join(age_lookup, by="age_name") %>%
     mutate(VLW_a=VSLY*DALY_age/1e9, VLW_a_lo=VSLY*lower_age/1e9, VLW_a_hi=VSLY*upper_age/1e9)
   both <- base %>%
     group_by(location_id,LMIC_group,age_name,age_mid,age_order,year) %>%
-    summarise(DALY_age=sum(DALY_age),lower_age=sum(lower_age),upper_age=sum(upper_age),
-              VLW_a=sum(VLW_a),VLW_a_lo=sum(VLW_a_lo),VLW_a_hi=sum(VLW_a_hi),.groups="drop") %>%
+    summarise(DALY_age=sum(DALY_age),lower_age=NA_real_,upper_age=NA_real_,
+              VLW_a=sum(VLW_a),VLW_a_lo=NA_real_,VLW_a_hi=NA_real_,.groups="drop") %>%
     mutate(sex_id=3L, sex_name="Both")
   bind_rows(
     base %>% select(location_id,LMIC_group,sex_id,sex_name,age_name,age_mid,age_order,
@@ -229,22 +246,105 @@ compute_age <- function(ie, r = discount_rate) {
     both)
 }
 
-# ── ETS fit + diagnostics helper (reviewer M5) ────────────────────────────────
+# ── Forecast helpers: one canonical R3 workflow ───────────────────────────────
 fh <- 2050 - 2023
-ets_fit <- function(series, label) {
-  ts1 <- ts(series, start=1990, frequency=1)
-  fit <- ets(ts1, model="AAN", damped=TRUE)
-  fc  <- forecast(fit, h=fh, level=95)
-  p   <- fit$par
-  gv  <- function(nm) if (nm %in% names(p)) unname(p[nm]) else NA_real_
-  lb  <- tryCatch(Box.test(residuals(fit), lag=10, type="Ljung-Box",
-                           fitdf=min(length(p),9))$p.value, error=function(e) NA_real_)
-  rmse<- tryCatch(unname(accuracy(fit)[1,"RMSE"]), error=function(e) NA_real_)
-  diag <- tibble(series=label, method=fit$method,
-                 alpha=gv("alpha"), beta=gv("beta"), phi=gv("phi"),
-                 sigma2=fit$sigma2, AIC=fit$aic, AICc=fit$aicc, BIC=fit$bic,
-                 RMSE=rmse, LjungBox_p=lb)
-  list(fc=fc, diag=diag)
+forecast_level <- 95
+simulation_n <- 50000L
+
+fit_series <- function(series, model=c("ETS","ARIMA"), h=fh, label="") {
+  model <- match.arg(model)
+  y <- ts(series, start=1990, frequency=1)
+  fit <- if (model=="ETS") {
+    ets(y, model="AAN", damped=TRUE)
+  } else {
+    auto.arima(y, seasonal=FALSE, stepwise=FALSE, approximation=FALSE)
+  }
+  # R3 Comment 2: level=95 is explicit; column 1 is therefore the 95% interval.
+  fc <- forecast(fit, h=h, level=forecast_level)
+  fitdf <- if (model=="ETS") length(fit$par) else
+    sum(arimaorder(fit)[c("p","q","P","Q")], na.rm=TRUE)
+  lag_use <- max(fitdf+3L, min(10L, floor(length(series)/5)))
+  lag_use <- min(lag_use, length(series)-1L)
+  lb <- Box.test(residuals(fit), lag=lag_use, type="Ljung-Box", fitdf=fitdf)
+  p <- if (model=="ETS") fit$par else numeric()
+  gv <- function(nm) if (nm %in% names(p)) unname(p[nm]) else NA_real_
+  method <- if (model=="ETS") fit$method else
+    paste0("ARIMA(",paste(arimaorder(fit)[c("p","d","q")],collapse=","),")")
+  diag <- tibble(series=label, model=model, method=method,
+    alpha=gv("alpha"), beta=gv("beta"), phi=gv("phi"),
+    sigma2=ifelse(model=="ETS",fit$sigma2,fit$sigma2),
+    AIC=AIC(fit), AICc=ifelse(model=="ETS",fit$aicc,NA_real_), BIC=BIC(fit),
+    RMSE=unname(accuracy(fit)[1,"RMSE"]), Ljung_Box_lag=lag_use,
+    Ljung_Box_fitdf=fitdf, Ljung_Box_p=as.numeric(lb$p.value),
+    residual_autocorrelation_signal=ifelse(lb$p.value<0.05,"Yes","No"))
+  list(fit=fit, fc=fc, diag=diag, residuals=as.numeric(residuals(fit)))
+}
+
+calc_errors <- function(actual,pred) {
+  e <- actual-pred
+  tibble(MAE=mean(abs(e)),RMSE=sqrt(mean(e^2)),MAPE=mean(abs(e/actual))*100)
+}
+
+validate_series <- function(series,label,outcome) {
+  train <- series[1:28] # 1990-2017
+  test <- series[29:34] # 2018-2023
+  map_dfr(c("ETS","ARIMA"),function(model) {
+    z <- fit_series(train,model=model,h=length(test),label=label)
+    calc_errors(test,as.numeric(z$fc$mean)) %>%
+      mutate(series=label,outcome=outcome,model=model,holdout="2018-2023",
+             interval_level=forecast_level,.before=1)
+  })
+}
+
+nearest_correlation <- function(x) {
+  x[is.na(x)] <- 0
+  diag(x) <- 1
+  e <- eigen((x+t(x))/2,symmetric=TRUE)
+  y <- e$vectors %*% diag(pmax(e$values,1e-8)) %*% t(e$vectors)
+  cov2cor(y)
+}
+
+joint_income_projection <- function(history,vsly_2023,model=c("ETS","ARIMA"),
+                                    seed=20260724L) {
+  model <- match.arg(model)
+  groups <- income_fct
+  fits <- setNames(lapply(groups,function(g) {
+    x <- history %>% filter(LMIC_group==g) %>% arrange(year) %>% pull(D)
+    fit_series(x,model=model,label=paste("DALY",g,sep="|"))
+  }),groups)
+  corr <- nearest_correlation(cor(do.call(cbind,lapply(fits,`[[`,"residuals")),
+                                  use="pairwise.complete.obs"))
+  years <- 2024:2050
+  all_rows <- vector("list",length(years))
+  group_rows <- vector("list",length(years))
+  for (k in seq_along(years)) {
+    means <- sapply(fits,function(z) as.numeric(z$fc$mean[k]))
+    lowers <- sapply(fits,function(z) as.numeric(z$fc$lower[k,1]))
+    uppers <- sapply(fits,function(z) as.numeric(z$fc$upper[k,1]))
+    ses <- pmax((uppers-lowers)/(2*qnorm(0.975)),.Machine$double.eps)
+    cov_mat <- diag(ses) %*% corr %*% diag(ses)
+    set.seed(seed+k)
+    z <- matrix(rnorm(simulation_n*length(groups)),ncol=length(groups))
+    draws <- sweep(z %*% chol(cov_mat),2,means,"+")
+    v <- vsly_2023$VSLY_effective[match(groups,vsly_2023$LMIC_group)]/1e9
+    total_d <- rowSums(draws)
+    total_v <- rowSums(sweep(draws,2,v,"*"))
+    all_rows[[k]] <- tibble(model=model,Year=years[k],Group="All LMICs",
+      DALY=sum(means),DALY_lower_95_PI=quantile(total_d,0.025),
+      DALY_upper_95_PI=quantile(total_d,0.975),
+      VLW_billion=sum(means*v),VLW_lower_95_PI_billion=quantile(total_v,0.025),
+      VLW_upper_95_PI_billion=quantile(total_v,0.975),
+      interval_level=forecast_level,simulation_draws=simulation_n,
+      method="Joint normal simulation using explicit 95% marginal forecast intervals and empirical residual correlation")
+    group_rows[[k]] <- tibble(model=model,Year=years[k],Group=groups,
+      DALY=means,DALY_lower_95_PI=lowers,DALY_upper_95_PI=uppers,
+      VLW_billion=means*v,VLW_lower_95_PI_billion=lowers*v,
+      VLW_upper_95_PI_billion=uppers*v,interval_level=forecast_level,
+      simulation_draws=NA_integer_,method="Group DALY forecast monetized using the fixed 2023 group effective VSLY")
+  }
+  list(all=bind_rows(all_rows),groups=bind_rows(group_rows),
+       diagnostics=bind_rows(lapply(fits,`[[`,"diag")),residual_correlation=corr,
+       fits=fits)
 }
 
 # ======================================================================
@@ -282,11 +382,8 @@ for (ie in ie_values) {
   mk_sum <- function(data, gv=NULL) {
     g <- if(!is.null(gv)) data %>% group_by(across(all_of(gv))) else data
     g %>% summarise(N=n(),
-      D=sum(DALY),Dl=sum(lower),Dh=sum(upper),
-      V=sum(VLW),Vl=sum(VLW_lo),Vh=sum(VLW_hi),
-      Vu=sum(VLW_u),Vul=sum(VLW_u_lo),Vuh=sum(VLW_u_hi),
-      Wp=weighted.mean(pct,GDP_tot),Wpl=weighted.mean(pct_lo,GDP_tot),
-      Wph=weighted.mean(pct_hi,GDP_tot), mH=mean(HALE),.groups="drop")
+      D=sum(DALY),V=sum(VLW),Vu=sum(VLW_u),
+      Wp=weighted.mean(pct,GDP_tot),mH=mean(HALE),.groups="drop")
   }
 
   # Table 1 — income summary (+ IE valuation-sensitivity range only on base IE)
@@ -294,63 +391,71 @@ for (ie in ie_values) {
     mk_sum(d23,"LMIC_group") %>% arrange(factor(LMIC_group,levels=income_fct)),
     mk_sum(d23) %>% mutate(LMIC_group="All LMICs"))
   t1 <- t1_core %>% transmute(`Income Group`=LMIC_group, Countries=N,
-    `DALYs (thousands)`=fmt_ui(D,Dl,Dh,1,1e3),
-    `VLW (billion USD) [DALY 95% UI]`=fmt_ui(V,Vl,Vh,2),
-    `VLW undiscounted r=0 (billion USD)`=fmt_ui(Vu,Vul,Vuh,2),
-    `VLW/GDP (%) [DALY 95% UI]`=fmt_ui(Wp,Wpl,Wph,4),
+    `DALYs (thousands; point estimate)`=round(D/1e3,1),
+    `VLW (billion constant-2023 USD; point estimate)`=round(V,2),
+    `VLW undiscounted r=0 (billion constant-2023 USD)`=round(Vu,2),
+    `VLW/GDP (%; point estimate)`=round(Wp,4),
     `Mean HALE`=formatC(mH,format="f",digits=1))
   write_csv(t1, file.path(ie_dir,"Table1_income_summary.csv"))
+  if (ie==ie_base) write_csv(t1,file.path(submission_table_dir,
+    "Main Table 1_2023 income summary.csv"))
 
   # Table 2 — sex × income (Male+Female sum to Both by construction)
   t2 <- d23_all %>% group_by(sex_name,LMIC_group) %>%
-    summarise(N=n(),D=sum(DALY),Dl=sum(lower),Dh=sum(upper),
-      V=sum(VLW),Vl=sum(VLW_lo),Vh=sum(VLW_hi),
-      Vu=sum(VLW_u),Vul=sum(VLW_u_lo),Vuh=sum(VLW_u_hi),.groups="drop") %>%
+    summarise(N=n(),D=sum(DALY),V=sum(VLW),Vu=sum(VLW_u),.groups="drop") %>%
     transmute(Sex=sex_name,`Income Group`=LMIC_group,Countries=N,
-      `DALYs (thousands)`=fmt_ui(D,Dl,Dh,1,1e3),
-      `VLW (billion USD)`=fmt_ui(V,Vl,Vh,2),
-      `VLW undiscounted (billion USD)`=fmt_ui(Vu,Vul,Vuh,2))
+      `DALYs (thousands; point estimate)`=round(D/1e3,1),
+      `VLW (billion constant-2023 USD; point estimate)`=round(V,2),
+      `VLW undiscounted (billion constant-2023 USD)`=round(Vu,2))
   write_csv(t2, file.path(ie_dir,"Table2_sex_income.csv"))
+  if (ie==ie_base) write_csv(t2,file.path(submission_table_dir,
+    "Main Table 2_sex-specific burden.csv"))
 
   # Table 3 — all countries ranked by VLW/GDP
   t3 <- d23 %>% arrange(desc(pct)) %>% mutate(Rank=row_number()) %>%
     transmute(Rank,Country=location_name,`Income Group`=LMIC_group,
       `GDP pc (PPP)`=formatC(GDP_pc,format="f",digits=0,big.mark=","),
-      `DALYs (thousands)`=fmt_ui(DALY,lower,upper,1,1e3),
-      `VLW (billion USD)`=fmt_ui(VLW,VLW_lo,VLW_hi,3),
-      `VLW/GDP (%)`=fmt_ui(pct,pct_lo,pct_hi,4))
+      `DALYs (thousands; point estimate)`=round(DALY/1e3,1),
+      `VLW (billion constant-2023 USD; point estimate)`=round(VLW,3),
+      `VLW/GDP (%; point estimate)`=round(pct,4))
   write_csv(t3, file.path(ie_dir,"Table3_all_LMIC_countries.csv"))
+  if (ie==ie_base) write_csv(t3,file.path(submission_table_dir,
+    "Supplementary Table 1_country burden.csv"))
 
   # Table 4 — country × sex full
   t4 <- d23_all %>% transmute(Country=location_name,Sex=sex_name,`Income Group`=LMIC_group,
-    `DALYs`=fmt_ui(DALY,lower,upper,0),
-    `VLW (billion USD)`=fmt_ui(VLW,VLW_lo,VLW_hi,3),
-    `VLW undiscounted (billion USD)`=fmt_ui(VLW_u,VLW_u_lo,VLW_u_hi,3),
-    `VLW/GDP (%)`=fmt_ui(pct,pct_lo,pct_hi,4))
+    `DALYs (point estimate)`=round(DALY,0),
+    `VLW (billion constant-2023 USD; point estimate)`=round(VLW,3),
+    `VLW undiscounted (billion constant-2023 USD)`=round(VLW_u,3),
+    `VLW/GDP (%; point estimate)`=round(pct,4))
   write_csv(t4, file.path(ie_dir,"Table4_country_full.csv"))
+  if (ie==ie_base) write_csv(t4,file.path(submission_table_dir,
+    "Supplementary Table 2_country and sex burden.csv"))
 
   # Table 5 — temporal
   t5 <- df %>% filter(sex_name=="Both",year %in% c(1990,2000,2010,2023)) %>%
     group_by(LMIC_group,year) %>%
-    summarise(D=sum(DALY),Dl=sum(lower),Dh=sum(upper),
-      V=sum(VLW),Vl=sum(VLW_lo),Vh=sum(VLW_hi),.groups="drop") %>%
+    summarise(D=sum(DALY),V=sum(VLW),.groups="drop") %>%
     transmute(`Income Group`=LMIC_group,Year=year,
-      `DALYs (thousands)`=fmt_ui(D,Dl,Dh,1,1e3),
-      `VLW (billion USD)`=fmt_ui(V,Vl,Vh,2)) %>%
+      `DALYs (thousands; point estimate)`=round(D/1e3,1),
+      `VLW (billion constant-2023 USD; point estimate)`=round(V,2)) %>%
     arrange(factor(`Income Group`,levels=income_fct),Year)
   write_csv(t5, file.path(ie_dir,"Table5_temporal.csv"))
+  if (ie==ie_base) write_csv(t5,file.path(submission_table_dir,
+    "Main Table 3_temporal trends.csv"))
 
   # Table 6 — age-specific (now SUMS to Table 1 total)
   age_both <- df_av %>% filter(sex_name=="Both") %>%
     group_by(age_name,age_mid,age_order) %>%
-    summarise(D=sum(DALY_age),Dl=sum(lower_age),Dh=sum(upper_age),
-      V=sum(VLW_a),Vl=sum(VLW_a_lo),Vh=sum(VLW_a_hi),.groups="drop") %>%
+    summarise(D=sum(DALY_age),V=sum(VLW_a),.groups="drop") %>%
     arrange(age_order)
   t6 <- age_both %>% transmute(`Age Group`=age_name,
-      `DALYs`=fmt_ui(D,Dl,Dh,0),
-      `VLW (billion USD)`=fmt_ui(V,Vl,Vh,3),
+      `DALYs (point estimate)`=round(D,0),
+      `VLW (billion constant-2023 USD; point estimate)`=round(V,3),
       `Share of total VLW (%)`=formatC(V/sum(V)*100,format="f",digits=1))
   write_csv(t6, file.path(ie_dir,"Table6_age_specific.csv"))
+  if (ie==ie_base) write_csv(t6,file.path(submission_table_dir,
+    "Main Table 4_age-specific burden.csv"))
 
   # ════════ INFERENTIAL TEST — Kruskal-Wallis (reviewer M4) ════════
   kdat <- d23 %>% mutate(grp=factor(LMIC_group,levels=income_fct))
@@ -368,29 +473,60 @@ for (ie in ie_values) {
   ph_df <- as.data.frame(ph$p.value) %>% rownames_to_column("group")
   write_csv(ph_df, file.path(ie_dir,"Stats_KW_posthoc_pairwise_wilcoxon_bonferroni.csv"))
 
+  # Descriptive country-level log-linear regression with HC3 inference (R3 minor point).
+  reg <- lm(log(pct) ~ log(GDP_pc),data=d23)
+  reg_vcov <- sandwich::vcovHC(reg,type="HC3")
+  reg_beta <- coef(reg)[2]
+  reg_se <- sqrt(diag(reg_vcov))[2]
+  reg_df <- df.residual(reg)
+  reg_t <- reg_beta/reg_se
+  reg_ci <- reg_beta+c(-1,1)*qt(0.975,reg_df)*reg_se
+  reg_out <- tibble(
+    term="log GDP per capita (PPP, current international $)",estimate=reg_beta,
+    HC3_standard_error=reg_se,lower_95_CI=reg_ci[1],upper_95_CI=reg_ci[2],
+    t_statistic=reg_t,df=reg_df,p_value_two_sided=2*pt(abs(reg_t),reg_df,lower.tail=FALSE),
+    n=nobs(reg),R_squared=summary(reg)$r.squared,adjusted_R_squared=summary(reg)$adj.r.squared,
+    outcome="log country VLW/GDP (%)",weights="None (country-level unweighted OLS)",
+    inference="HC3 heteroskedasticity-consistent standard errors; two-sided t test and 95% CI",
+    interpretation="Descriptive association only; the outcome and income grouping contain GDP-derived quantities.")
+  write_csv(reg_out,file.path(ie_dir,"Stats_income_gradient_regression_HC3.csv"))
+  write_csv(kw_summary %>% mutate(
+    regression_term=reg_out$term,regression_estimate=reg_out$estimate,
+    regression_HC3_SE=reg_out$HC3_standard_error,
+    regression_lower_95_CI=reg_out$lower_95_CI,
+    regression_upper_95_CI=reg_out$upper_95_CI,
+    regression_p_two_sided=reg_out$p_value_two_sided,
+    regression_R2=reg_out$R_squared,
+    regression_note=reg_out$interpretation),
+    file.path(ie_dir,"Stats_KruskalWallis_and_regression.csv"))
+  if (ie==ie_base) {
+    write_csv(reg_out,file.path(r3_dir,"R3_income_gradient_regression_HC3.csv"))
+    write_csv(reg_out,file.path(submission_table_dir,
+      "Supplementary Table 8_income-gradient regression HC3.csv"))
+  }
+
   # ════════ FIGURES ════════
   # Figure 1 — 2023 snapshot
   bar1 <- d23 %>% group_by(LMIC_group) %>%
-    summarise(V=sum(VLW),Vl=sum(VLW_lo),Vh=sum(VLW_hi),.groups="drop") %>%
+    summarise(V=sum(VLW),.groups="drop") %>%
     mutate(LMIC_group=factor(LMIC_group,levels=income_fct))
   p1a <- ggplot(bar1,aes(LMIC_group,V,fill=LMIC_group))+
     geom_col(width=0.6,colour="white",linewidth=0.3)+
-    geom_errorbar(aes(ymin=Vl,ymax=Vh),width=0.12,linewidth=0.3)+
     scale_fill_manual(values=income_pal,guide="none")+
     scale_y_continuous(expand=expansion(mult=c(0,0.1)))+
     scale_x_discrete(labels=c("LIC","LMIC","UMIC"))+labs(x=NULL,y="VLW (billion USD)")+theme_nm()
   p1b <- ggplot(d23,aes(factor(LMIC_group,income_fct),pct,fill=LMIC_group))+
     geom_boxplot(width=0.5,outlier.shape=NA,alpha=0.5,linewidth=0.3)+
-    geom_jitter(aes(colour=LMIC_group),width=0.12,size=0.6,alpha=0.5)+
+    geom_point(aes(colour=LMIC_group),size=0.6,alpha=0.5,
+      position=position_jitter(width=0.12,height=0,seed=20260724L))+
     scale_fill_manual(values=income_pal,guide="none")+scale_colour_manual(values=income_pal,guide="none")+
     scale_y_continuous(labels=\(x) paste0(x,"%"))+scale_x_discrete(labels=c("LIC","LMIC","UMIC"))+
     labs(x=NULL,y="VLW / GDP (%)")+theme_nm()
   sex_bar <- d23_all %>% filter(sex_name %in% c("Male","Female")) %>%
-    group_by(sex_name,LMIC_group) %>% summarise(V=sum(VLW),Vl=sum(VLW_lo),Vh=sum(VLW_hi),.groups="drop") %>%
+    group_by(sex_name,LMIC_group) %>% summarise(V=sum(VLW),.groups="drop") %>%
     mutate(LMIC_group=factor(LMIC_group,levels=income_fct))
   p1c <- ggplot(sex_bar,aes(LMIC_group,V,fill=sex_name))+
     geom_col(position=position_dodge(0.65),width=0.55,colour="white",linewidth=0.2)+
-    geom_errorbar(aes(ymin=Vl,ymax=Vh),position=position_dodge(0.65),width=0.12,linewidth=0.25)+
     scale_fill_manual(values=sex_pal,name="Sex")+scale_y_continuous(expand=expansion(mult=c(0,0.1)))+
     scale_x_discrete(labels=c("LIC","LMIC","UMIC"))+labs(x=NULL,y="VLW (billion USD)")+
     theme_nm()+theme(legend.position=c(0.15,0.85))
@@ -408,8 +544,8 @@ for (ie in ie_values) {
 
   # Figure 2 — temporal
   tot_t <- df %>% filter(sex_name=="Both") %>% group_by(year) %>%
-    summarise(V=sum(VLW),Vl=sum(VLW_lo),Vh=sum(VLW_hi),.groups="drop")
-  p2a <- ggplot(tot_t,aes(year,V))+geom_ribbon(aes(ymin=Vl,ymax=Vh),fill=pal$blue,alpha=0.12)+
+    summarise(V=sum(VLW),.groups="drop")
+  p2a <- ggplot(tot_t,aes(year,V))+
     geom_line(colour=pal$blue,linewidth=0.7)+scale_x_continuous(breaks=seq(1990,2023,5))+
     scale_y_continuous(expand=expansion(mult=c(0,0.05)))+labs(x="Year",y="Total VLW (billion USD)")+theme_nm()
   inc_t <- df %>% filter(sex_name=="Both") %>% group_by(LMIC_group,year) %>%
@@ -436,10 +572,12 @@ for (ie in ie_values) {
   w  <- df_world %>% left_join(md,by="location_id")
   p3a <- ggplot(w)+geom_sf(aes(fill=VLW),colour="grey40",linewidth=0.06)+
     scale_fill_gradientn(colours=map_blue,na.value="grey92",trans="log1p",
-      breaks=c(0,0.01,0.1,1,10,100),labels=c("0","0.01","0.1","1","10","100"),name="VLW\n(billion)")+theme_nm_map()
+      breaks=c(0,0.1,1,10,100),labels=c("0","0.1","1","10","100"),name="VLW\n(billion)",
+      guide=guide_colourbar(barheight=grid::unit(34,"mm"),title.position="top"))+theme_nm_map()
   p3b <- ggplot(w)+geom_sf(aes(fill=pct),colour="grey40",linewidth=0.06)+
     scale_fill_gradientn(colours=map_red,na.value="grey92",trans="log1p",
-      breaks=c(0,0.01,0.05,0.1,0.5,1),labels=c("0","0.01","0.05","0.1","0.5","1"),name="VLW/GDP\n(%)")+theme_nm_map()
+      breaks=c(0,0.1,0.5,1),labels=c("0","0.1","0.5","1"),name="VLW/GDP\n(%)",
+      guide=guide_colourbar(barheight=grid::unit(34,"mm"),title.position="top"))+theme_nm_map()
   w2 <- df_world %>% left_join(d23 %>% select(location_id,LMIC_group),by="location_id")
   p3c <- ggplot(w2)+geom_sf(aes(fill=LMIC_group),colour="grey40",linewidth=0.06)+
     scale_fill_manual(values=income_pal,na.value="grey92",name="Income Group")+theme_nm_map()
@@ -448,13 +586,13 @@ for (ie in ie_values) {
 
   # Figure 4 — age-specific (VLW now proportional to DALYs)
   age_all <- df_av %>% filter(sex_name=="Both") %>% group_by(age_name,age_mid,age_order) %>%
-    summarise(V=sum(VLW_a),Vl=sum(VLW_a_lo),Vh=sum(VLW_a_hi),.groups="drop") %>% arrange(age_order)
-  p4a <- ggplot(age_all,aes(age_mid,V))+geom_ribbon(aes(ymin=Vl,ymax=Vh),fill=pal$teal,alpha=0.18)+
+    summarise(V=sum(VLW_a),.groups="drop") %>% arrange(age_order)
+  p4a <- ggplot(age_all,aes(age_mid,V))+
     geom_line(colour=pal$teal,linewidth=0.7)+geom_point(colour=pal$teal,size=1.2)+
     scale_x_continuous(breaks=seq(0,100,10))+labs(x="Age (years)",y="VLW (billion USD)")+theme_nm()
   age_daly <- df_av %>% filter(sex_name=="Both") %>% group_by(age_name,age_mid,age_order) %>%
-    summarise(D=sum(DALY_age)/1e3,Dl=sum(lower_age)/1e3,Dh=sum(upper_age)/1e3,.groups="drop") %>% arrange(age_order)
-  p4b <- ggplot(age_daly,aes(age_mid,D))+geom_ribbon(aes(ymin=Dl,ymax=Dh),fill=pal$purple,alpha=0.15)+
+    summarise(D=sum(DALY_age)/1e3,.groups="drop") %>% arrange(age_order)
+  p4b <- ggplot(age_daly,aes(age_mid,D))+
     geom_line(colour=pal$purple,linewidth=0.7)+geom_point(colour=pal$purple,size=1.2)+
     scale_x_continuous(breaks=seq(0,100,10))+labs(x="Age (years)",y="DALYs (thousands)")+theme_nm()
   age_sex <- df_av %>% filter(sex_name %in% c("Male","Female")) %>%
@@ -471,54 +609,152 @@ for (ie in ie_values) {
   pdf(file.path(ie_dir,"Figure4_age_specific.pdf"),width=9,height=7)
   print((p4a|p4b)/(p4c|p4d)+plot_annotation(tag_levels="a")&theme(plot.tag=element_text(size=10,face="bold"))); dev.off()
 
-  # ════════ FORECAST to 2050 (reconciled: total = sum of income groups) ════════
+  # ════════ FORECAST to 2050: DALY is the primary estimand (R3 Comments 2-5) ════════
   fc_inc_raw <- df %>% filter(sex_name=="Both") %>% group_by(LMIC_group,year) %>%
     summarise(V=sum(VLW),D=sum(DALY),.groups="drop")
-  inc_fc <- list(); diags <- list()
-  for (g in income_fct) {
-    s <- fc_inc_raw %>% filter(LMIC_group==g) %>% arrange(year)
-    fv <- ets_fit(s$V, paste0(ie_tag,"|VLW|",g)); fd <- ets_fit(s$D, paste0(ie_tag,"|DALY|",g))
-    diags[[length(diags)+1]] <- fv$diag; diags[[length(diags)+1]] <- fd$diag
-    inc_fc[[g]] <- bind_rows(
-      s %>% mutate(Vl=NA_real_,Vh=NA_real_,Dl=NA_real_,Dh=NA_real_,type="Observed"),
-      tibble(LMIC_group=g,year=2024:2050,V=as.numeric(fv$fc$mean),
-             Vl=as.numeric(fv$fc$lower[,1]),Vh=as.numeric(fv$fc$upper[,1]),
-             D=as.numeric(fd$fc$mean),Dl=as.numeric(fd$fc$lower[,1]),Dh=as.numeric(fd$fc$upper[,1]),
-             type="Forecast"))
-  }
-  fc_inc <- bind_rows(inc_fc)
-  # all-LMIC total = SUM of income-group forecasts (reconciles, reviewer M5)
-  fc_all <- fc_inc %>% group_by(year,type) %>%
-    summarise(V=sum(V),Vl=sum(Vl),Vh=sum(Vh),D=sum(D),Dl=sum(Dl),Dh=sum(Dh),.groups="drop")
-  # sex forecasts (Both = Male+Female)
-  fc_sex_raw <- df %>% filter(sex_name %in% c("Male","Female")) %>% group_by(sex_name,year) %>%
-    summarise(V=sum(VLW),.groups="drop")
-  sex_fc <- list()
-  for (sx in c("Male","Female")) {
-    s <- fc_sex_raw %>% filter(sex_name==sx) %>% arrange(year)
-    fv <- ets_fit(s$V, paste0(ie_tag,"|VLW|",sx)); diags[[length(diags)+1]] <- fv$diag
-    sex_fc[[sx]] <- bind_rows(
-      s %>% mutate(Vl=NA_real_,Vh=NA_real_,type="Observed"),
-      tibble(sex_name=sx,year=2024:2050,V=as.numeric(fv$fc$mean),
-             Vl=as.numeric(fv$fc$lower[,1]),Vh=as.numeric(fv$fc$upper[,1]),type="Forecast"))
-  }
-  fc_sex <- bind_rows(sex_fc)
-  ets_diag_all[[ie_tag]] <- bind_rows(diags)
-  write_csv(bind_rows(diags), file.path(ie_dir,"Stats_ETS_diagnostics.csv"))
+  vsly_group_2023 <- fc_inc_raw %>% filter(year==2023) %>%
+    transmute(LMIC_group,VSLY_effective=V*1e9/D)
+  primary_ets <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ETS",seed=20260724L)
+  primary_arima <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ARIMA",seed=20260725L)
 
-  # Forecast tables
+  obs_all <- fc_inc_raw %>% group_by(year) %>% summarise(V=sum(V),D=sum(D),.groups="drop") %>%
+    mutate(Vl=NA_real_,Vh=NA_real_,Dl=NA_real_,Dh=NA_real_,type="Observed")
+  pred_all <- primary_ets$all %>% transmute(year=Year,V=VLW_billion,
+    Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,D=DALY,
+    Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
+  fc_all <- bind_rows(obs_all,pred_all)
+
+  obs_inc <- fc_inc_raw %>% transmute(LMIC_group,year,V,D,Vl=NA_real_,Vh=NA_real_,
+                                      Dl=NA_real_,Dh=NA_real_,type="Observed")
+  pred_inc <- primary_ets$groups %>% transmute(LMIC_group=Group,year=Year,
+    V=VLW_billion,Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,
+    D=DALY,Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
+  fc_inc <- bind_rows(obs_inc,pred_inc)
+
+  # Sex-specific direct VLW forecasts are retained as secondary descriptive series.
+  fc_sex_raw <- df %>% filter(sex_name %in% c("Male","Female")) %>%
+    group_by(sex_name,year) %>% summarise(V=sum(VLW),.groups="drop")
+  sex_fits <- setNames(lapply(c("Male","Female"),function(sx) {
+    x <- fc_sex_raw %>% filter(sex_name==sx) %>% arrange(year) %>% pull(V)
+    fit_series(x,"ETS",label=paste(ie_tag,"VLW",sx,sep="|"))
+  }),c("Male","Female"))
+  fc_sex <- bind_rows(lapply(names(sex_fits),function(sx) {
+    s <- fc_sex_raw %>% filter(sex_name==sx)
+    z <- sex_fits[[sx]]$fc
+    bind_rows(s %>% mutate(Vl=NA_real_,Vh=NA_real_,type="Observed"),
+      tibble(sex_name=sx,year=2024:2050,V=as.numeric(z$mean),
+             Vl=as.numeric(z$lower[,1]),Vh=as.numeric(z$upper[,1]),type="Forecast"))
+  }))
+
+  diags <- bind_rows(primary_ets$diagnostics,primary_arima$diagnostics,
+                     bind_rows(lapply(sex_fits,`[[`,"diag"))) %>% mutate(IE=ie,.before=1)
+  ets_diag_all[[ie_tag]] <- diags
+  write_csv(diags,file.path(ie_dir,"Stats_forecast_diagnostics.csv"))
+  write_csv(diags %>% filter(model=="ETS"),file.path(ie_dir,"Stats_ETS_diagnostics.csv"))
+
+  # Forecast tables: all-LMIC PIs come from joint simulation, never summed endpoints.
   fc_yrs <- c(2025,2030,2035,2040,2045,2050)
-  t7a <- fc_all %>% filter(year %in% fc_yrs) %>% transmute(Year=year,Group="All LMICs (=sum of income groups)",
-      `VLW (billion USD, 95% PI)`=fmt_ui(V,Vl,Vh,2),
-      `DALYs (thousands, 95% PI)`=fmt_ui(D,Dl,Dh,1,1e3))
-  t7b <- fc_inc %>% filter(year %in% fc_yrs,type=="Forecast") %>% transmute(Year=year,Group=LMIC_group,
-      `VLW (billion USD, 95% PI)`=fmt_ui(V,Vl,Vh,2),
-      `DALYs (thousands, 95% PI)`=fmt_ui(D,Dl,Dh,1,1e3))
-  write_csv(bind_rows(t7a,t7b) %>% arrange(Year,Group), file.path(ie_dir,"Table7_forecast_summary.csv"))
-  t8 <- fc_all %>% filter(type=="Forecast") %>% transmute(Year=year,
-      `VLW (billion USD, 95% PI)`=fmt_ui(V,Vl,Vh,2),
-      `DALYs (thousands, 95% PI)`=fmt_ui(D,Dl,Dh,1,1e3))
-  write_csv(t8, file.path(ie_dir,"Table8_forecast_annual.csv"))
+  t7 <- bind_rows(primary_ets$all,primary_ets$groups,primary_arima$all,primary_arima$groups) %>%
+    filter(Year %in% fc_yrs) %>% arrange(Year,model,Group)
+  write_csv(t7,file.path(ie_dir,"Table7_forecast_summary.csv"))
+  write_csv(bind_rows(primary_ets$all,primary_arima$all),file.path(ie_dir,"Table8_forecast_annual.csv"))
+
+  if (ie==ie_base) {
+    main_t5 <- bind_rows(
+      t7 %>% filter(Group=="All LMICs") %>%
+        arrange(Year,factor(model,levels=c("ETS","ARIMA"))),
+      t7 %>% filter(Year==2050,Group!="All LMICs") %>%
+        arrange(factor(model,levels=c("ETS","ARIMA")),
+                factor(Group,levels=income_fct))
+    ) %>% transmute(
+      Model=model,Year,Group,
+      `VLW (billion constant-2023 USD; 95% PI)`=
+        fmt_ui(VLW_billion,VLW_lower_95_PI_billion,
+               VLW_upper_95_PI_billion,d=2),
+      `DALYs (thousands; 95% PI)`=
+        fmt_ui(DALY,DALY_lower_95_PI,DALY_upper_95_PI,d=1,s=1000)
+    )
+    write_csv(main_t5,file.path(submission_table_dir,
+      "Main Table 5_selected projections.csv"))
+    write_csv(bind_rows(primary_ets$all,primary_arima$all),
+      file.path(submission_table_dir,
+        "Supplementary Table 3_annual ETS and ARIMA projections.csv"))
+
+    # Holdout validation retains the eight previously reported series so the
+    # ETS-versus-ARIMA comparison is completely transparent.
+    validation <- bind_rows(
+      map_dfr(income_fct,function(g) {
+        s <- fc_inc_raw %>% filter(LMIC_group==g) %>% arrange(year)
+        bind_rows(validate_series(s$D,g,"DALY"),validate_series(s$V,g,"VLW"))
+      }),
+      map_dfr(c("Male","Female"),function(sx) {
+        s <- fc_sex_raw %>% filter(sex_name==sx) %>% arrange(year)
+        validate_series(s$V,sx,"VLW")
+      }))
+    write_csv(validation,file.path(r3_dir,"R3_holdout_validation_8_series.csv"))
+    write_csv(validation,file.path(submission_table_dir,
+      "Supplementary Table 4_holdout validation.csv"))
+
+    # Full-series 2050 projections for the same eight series under both models.
+    long_range <- bind_rows(
+      map_dfr(income_fct,function(g) {
+        s <- fc_inc_raw %>% filter(LMIC_group==g) %>% arrange(year)
+        bind_rows(map_dfr(c("ETS","ARIMA"),function(m) {
+          z <- fit_series(s$D,m,label=g); tibble(series=g,outcome="DALY",model=m,
+            Year=2050,point=as.numeric(z$fc$mean[fh]),lower_95_PI=as.numeric(z$fc$lower[fh,1]),
+            upper_95_PI=as.numeric(z$fc$upper[fh,1]))}),
+          map_dfr(c("ETS","ARIMA"),function(m) {
+          z <- fit_series(s$V,m,label=g); tibble(series=g,outcome="VLW_billion",model=m,
+            Year=2050,point=as.numeric(z$fc$mean[fh]),lower_95_PI=as.numeric(z$fc$lower[fh,1]),
+            upper_95_PI=as.numeric(z$fc$upper[fh,1]))}))
+      }),
+      map_dfr(c("Male","Female"),function(sx) {
+        s <- fc_sex_raw %>% filter(sex_name==sx) %>% arrange(year)
+        map_dfr(c("ETS","ARIMA"),function(m) {
+          z <- fit_series(s$V,m,label=sx); tibble(series=sx,outcome="VLW_billion",model=m,
+            Year=2050,point=as.numeric(z$fc$mean[fh]),lower_95_PI=as.numeric(z$fc$lower[fh,1]),
+            upper_95_PI=as.numeric(z$fc$upper[fh,1]))
+        })
+      }))
+    write_csv(long_range,file.path(r3_dir,"R3_ETS_ARIMA_2050_8_series.csv"))
+
+    diagnostics8 <- bind_rows(
+      map_dfr(income_fct,function(g) {
+        s <- fc_inc_raw %>% filter(LMIC_group==g) %>% arrange(year)
+        bind_rows(
+          map_dfr(c("ETS","ARIMA"),function(m)
+            fit_series(s$D,m,label=g)$diag %>% mutate(outcome="DALY")),
+          map_dfr(c("ETS","ARIMA"),function(m)
+            fit_series(s$V,m,label=g)$diag %>% mutate(outcome="VLW_billion")))
+      }),
+      map_dfr(c("Male","Female"),function(sx) {
+        s <- fc_sex_raw %>% filter(sex_name==sx) %>% arrange(year)
+        map_dfr(c("ETS","ARIMA"),function(m)
+          fit_series(s$V,m,label=sx)$diag %>% mutate(outcome="VLW_billion"))
+      })) %>% select(series,outcome,everything())
+    write_csv(diagnostics8,file.path(r3_dir,"R3_forecast_residual_diagnostics.csv"))
+    write_csv(diagnostics8,file.path(submission_table_dir,
+      "Supplementary Table 5_forecast and residual diagnostics.csv"))
+
+    # Reconciliation: primary DALY-derived VLW versus independently forecast VLW.
+    direct_rows <- map_dfr(c("ETS","ARIMA"),function(m) {
+      map_dfr(income_fct,function(g) {
+        s <- fc_inc_raw %>% filter(LMIC_group==g) %>% arrange(year)
+        z <- fit_series(s$V,m,label=g)
+        tibble(model=m,Year=2024:2050,Group=g,direct_VLW_billion=as.numeric(z$fc$mean))
+      })
+    })
+    primary_rows <- bind_rows(primary_ets$groups,primary_arima$groups) %>%
+      select(model,Year,Group,derived_VLW_billion=VLW_billion)
+    reconciliation <- primary_rows %>% left_join(direct_rows,by=c("model","Year","Group")) %>%
+      mutate(difference_billion=direct_VLW_billion-derived_VLW_billion,
+             percent_difference=100*difference_billion/derived_VLW_billion)
+    write_csv(reconciliation,file.path(r3_dir,"R3_projection_reconciliation.csv"))
+    write_csv(reconciliation,file.path(submission_table_dir,
+      "Supplementary Table 6_projection reconciliation.csv"))
+    write_csv(bind_rows(primary_ets$all,primary_arima$all),
+              file.path(r3_dir,"R3_primary_ETS_ARIMA_all_LMIC_projection.csv"))
+  }
 
   # Figure 5 — forecast
   p5a <- ggplot(fc_all,aes(year,V))+
@@ -551,23 +787,29 @@ for (ie in ie_values) {
   pdf(file.path(ie_dir,"Figure5_forecast_2050.pdf"),width=9,height=7)
   print((p5a|p5b)/(p5c|p5d)+plot_annotation(tag_levels="a")&theme(plot.tag=element_text(size=10,face="bold"))); dev.off()
 
-  # Figure 6 — ASR + fold change
+  # Figure 6 — explicitly labelled unweighted mean of country ASRs + fold change
   asr_t <- df_daly_rate %>% filter(sex_name=="Both",location_id %in% lmic_ids) %>%
     left_join(df_econ %>% select(location_id,LMIC_group),by="location_id") %>%
     group_by(LMIC_group,year) %>% summarise(R=mean(rate),.groups="drop") %>%
     mutate(LMIC_group=factor(LMIC_group,levels=income_fct))
   p6a <- ggplot(asr_t,aes(year,R,colour=LMIC_group))+geom_line(linewidth=0.6)+
     scale_colour_manual(values=income_pal,name="Income Group")+scale_x_continuous(breaks=seq(1990,2023,5))+
-    labs(x="Year",y="Age-standardized DALY rate\n(per 100,000)")+theme_nm()+theme(legend.position=c(0.72,0.22))
+    labs(x="Year",y="Unweighted mean of country-specific\nage-standardized DALY rates (per 100,000)")+
+    theme_nm()+theme(legend.position=c(0.72,0.22))
   chg <- df %>% filter(sex_name=="Both",year %in% c(1990,2023)) %>% group_by(LMIC_group,year) %>%
     summarise(V=sum(VLW),.groups="drop") %>% pivot_wider(names_from=year,values_from=V,names_prefix="y") %>%
     mutate(fold=y2023/y1990, LMIC_group=factor(LMIC_group,levels=income_fct))
   p6b <- ggplot(chg,aes(LMIC_group,fold,fill=LMIC_group))+geom_col(width=0.55,colour="white",linewidth=0.3)+
-    geom_text(aes(label=paste0(formatC(fold,format="f",digits=1),"×")),vjust=-0.3,size=2.5,fontface="bold")+
+    geom_text(aes(label=paste0(formatC(fold,format="f",digits=1),"x")),vjust=-0.3,size=2.5,fontface="bold")+
     scale_fill_manual(values=income_pal,guide="none")+scale_y_continuous(expand=expansion(mult=c(0,0.15)))+
     scale_x_discrete(labels=c("LIC","LMIC","UMIC"))+labs(x=NULL,y="VLW fold change\n(2023 vs 1990)")+theme_nm()
   pdf(file.path(ie_dir,"Figure6_ASR_foldchange.pdf"),width=9,height=3.8)
   print(p6a|p6b+plot_annotation(tag_levels="a")&theme(plot.tag=element_text(size=10,face="bold"))); dev.off()
+  if (ie==ie_base) {
+    write_csv(asr_t,file.path(r3_dir,"R3_unweighted_country_ASR_means.csv"))
+    write_csv(asr_t,file.path(submission_table_dir,
+      "Supplementary Table 9_unweighted country ASR means.csv"))
+  }
 
   vlw_2050 <- fc_all %>% filter(year==2050)
   cat("   VLW 2023 =",formatC(tot_all,format="f",digits=2),"B | age-sum =",
@@ -583,15 +825,15 @@ for (ie in ie_values) {
 ie_summary <- map_dfr(ie_values, function(ie) {
   d <- compute_allages(ie) %>% filter(year==2023,sex_name=="Both")
   d %>% summarise(IE=ie, Countries=n(),
-    VLW=sum(VLW),VLW_lo=sum(VLW_lo),VLW_hi=sum(VLW_hi),
-    VLW_u=sum(VLW_u),
-    Wp=weighted.mean(pct,GDP_tot),Wpl=weighted.mean(pct_lo,GDP_tot),Wph=weighted.mean(pct_hi,GDP_tot))
+    VLW=sum(VLW),VLW_u=sum(VLW_u),Wp=weighted.mean(pct,GDP_tot))
 })
 ie_tbl <- ie_summary %>% transmute(`Income Elasticity`=IE,
-  `VLW base 3% (billion USD) [DALY 95% UI]`=fmt_ui(VLW,VLW_lo,VLW_hi,2),
-  `VLW undiscounted (billion USD)`=formatC(VLW_u,format="f",digits=2),
-  `VLW/GDP (%)`=fmt_ui(Wp,Wpl,Wph,4))
+  `VLW base 3% (billion constant-2023 USD; point estimate)`=round(VLW,2),
+  `VLW undiscounted (billion constant-2023 USD)`=formatC(VLW_u,format="f",digits=2),
+  `VLW/GDP (%; point estimate)`=round(Wp,4))
 write_csv(ie_tbl, file.path(out_root,"CrossIE_sensitivity_summary.csv"))
+write_csv(ie_tbl,file.path(submission_table_dir,
+  "Main Table 6_income-elasticity sensitivity.csv"))
 
 # headline valuation-sensitivity range (IE 0.5–1.5) for the abstract/Table 1 note
 ie_range <- ie_summary %>% summarise(
@@ -602,24 +844,110 @@ write_csv(ie_range, file.path(out_root,"Headline_valuation_sensitivity_range.csv
 
 ie_bar <- map_dfr(ie_values, function(ie) {
   compute_allages(ie) %>% filter(year==2023,sex_name=="Both") %>% group_by(LMIC_group) %>%
-    summarise(V=sum(VLW),Vl=sum(VLW_lo),Vh=sum(VLW_hi),.groups="drop") %>%
+    summarise(V=sum(VLW),.groups="drop") %>%
     mutate(IE=paste0("IE = ",format(ie,nsmall=1)))
 }) %>% mutate(LMIC_group=factor(LMIC_group,levels=income_fct))
 ie_pal3 <- c("IE = 0.5"=pal$orange,"IE = 1.0"=pal$blue,"IE = 1.5"=pal$teal)
 p_ie <- ggplot(ie_bar,aes(LMIC_group,V,fill=IE))+
   geom_col(position=position_dodge(0.7),width=0.6,colour="white",linewidth=0.2)+
-  geom_errorbar(aes(ymin=Vl,ymax=Vh),position=position_dodge(0.7),width=0.12,linewidth=0.25)+
   scale_fill_manual(values=ie_pal3,name="Income\nElasticity")+scale_y_continuous(expand=expansion(mult=c(0,0.1)))+
   scale_x_discrete(labels=c("LIC","LMIC","UMIC"))+labs(x=NULL,y="VLW (billion USD)")+
   theme_nm()+theme(legend.position=c(0.15,0.8))
 pdf(file.path(out_root,"CrossIE_sensitivity_bar.pdf"),width=5.5,height=3.8); print(p_ie); dev.off()
+
+# Copy the final manuscript and supplementary figures to one upload-ready folder.
+# Source filenames retain the analysis numbering; destination filenames follow
+# the numbering used in the revised manuscript.
+submission_figure_map <- c(
+  "Figure 1_2023 snapshot.pdf" = file.path(out_root,"IE1","Figure1_2023_snapshot.pdf"),
+  "Figure 2_trends.pdf" = file.path(out_root,"IE1","Figure2_trends.pdf"),
+  "Figure 3_unweighted mean country ASR and fold change.pdf" = file.path(out_root,"IE1","Figure6_ASR_foldchange.pdf"),
+  "Figure 4_maps.pdf" = file.path(out_root,"IE1","Figure3_maps.pdf"),
+  "Figure 5_age specific.pdf" = file.path(out_root,"IE1","Figure4_age_specific.pdf"),
+  "Figure 6_forecast 2050.pdf" = file.path(out_root,"IE1","Figure5_forecast_2050.pdf"),
+  "Figure 7_IE sensitivity.pdf" = file.path(out_root,"CrossIE_sensitivity_bar.pdf"),
+  "Supplementary Figure 1_IE0.5 snapshot.pdf" = file.path(out_root,"IE05","Figure1_2023_snapshot.pdf"),
+  "Supplementary Figure 2_IE0.5 trends.pdf" = file.path(out_root,"IE05","Figure2_trends.pdf"),
+  "Supplementary Figure 3_IE0.5 unweighted mean country ASR.pdf" = file.path(out_root,"IE05","Figure6_ASR_foldchange.pdf"),
+  "Supplementary Figure 4_IE0.5 maps.pdf" = file.path(out_root,"IE05","Figure3_maps.pdf"),
+  "Supplementary Figure 5_IE0.5 age specific.pdf" = file.path(out_root,"IE05","Figure4_age_specific.pdf"),
+  "Supplementary Figure 6_IE0.5 forecast.pdf" = file.path(out_root,"IE05","Figure5_forecast_2050.pdf"),
+  "Supplementary Figure 7_IE1.5 snapshot.pdf" = file.path(out_root,"IE15","Figure1_2023_snapshot.pdf"),
+  "Supplementary Figure 8_IE1.5 trends.pdf" = file.path(out_root,"IE15","Figure2_trends.pdf"),
+  "Supplementary Figure 9_IE1.5 unweighted mean country ASR.pdf" = file.path(out_root,"IE15","Figure6_ASR_foldchange.pdf"),
+  "Supplementary Figure 10_IE1.5 maps.pdf" = file.path(out_root,"IE15","Figure3_maps.pdf"),
+  "Supplementary Figure 11_IE1.5 age specific.pdf" = file.path(out_root,"IE15","Figure4_age_specific.pdf"),
+  "Supplementary Figure 12_IE1.5 forecast.pdf" = file.path(out_root,"IE15","Figure5_forecast_2050.pdf")
+)
+missing_submission_figures <- submission_figure_map[!file.exists(submission_figure_map)]
+if (length(missing_submission_figures) > 0L) {
+  stop("Missing source figure(s): ",paste(missing_submission_figures,collapse=", "))
+}
+copy_ok <- file.copy(unname(submission_figure_map),
+                     file.path(submission_fig_dir,names(submission_figure_map)),
+                     overwrite=TRUE)
+if (!all(copy_ok)) stop("Failed to assemble one or more R3 submission figures.")
+
+# R3 Comment 1: without matched GBD draws, aggregate 95% UIs are not estimable.
+historical_interval_policy <- tibble(
+  reporting_level=c("GBD source row (country-sex or country-age)",
+                    "Any sum across countries, sexes, or ages"),
+  interval_status=c("GBD-reported marginal 95% UI may be retained at the original reporting level",
+                    "No 95% UI reported because matched draws are unavailable"),
+  prohibited_operation=c("None","Do not sum marginal 2.5th and 97.5th percentiles"),
+  manuscript_action=c("Country-level source intervals may be described as GBD-reported",
+                      "Report point estimates and separate IE=0.5-1.5 valuation sensitivity only"))
+write_csv(historical_interval_policy,file.path(r3_dir,"R3_historical_aggregate_interval_policy.csv"))
+
+# R3 minor point: quantify the DALY burden in the six GDP-excluded countries.
+daly_128_2023 <- df_daly_all %>% filter(year==2023,sex_id %in% c(1,2)) %>%
+  inner_join(df_lmic %>% select(location_id,location_name,LMIC_group),
+             by=c("location_id","location_name")) %>%
+  group_by(location_id,location_name,LMIC_group) %>%
+  summarise(DALY=sum(DALY),.groups="drop")
+excluded_ids <- setdiff(df_lmic$location_id,df_econ$location_id)
+excluded_country_burden <- daly_128_2023 %>% filter(location_id %in% excluded_ids) %>%
+  group_by(LMIC_group) %>% mutate(income_group_total_DALYs=sum(
+    daly_128_2023$DALY[daly_128_2023$LMIC_group==first(LMIC_group)]),
+    percent_of_income_group_DALYs=100*DALY/income_group_total_DALYs) %>% ungroup() %>%
+  mutate(all_128_LMIC_DALYs=sum(daly_128_2023$DALY),
+         percent_of_all_128_LMIC_DALYs=100*DALY/all_128_LMIC_DALYs,
+         VLW_status="Not estimable because 2023 GDP inputs required for VSL transfer are missing")
+excluded_summary <- tibble(
+  location_id=NA_real_,location_name="All six excluded countries",LMIC_group="Combined",
+  DALY=sum(excluded_country_burden$DALY),income_group_total_DALYs=NA_real_,
+  percent_of_income_group_DALYs=NA_real_,all_128_LMIC_DALYs=sum(daly_128_2023$DALY),
+  percent_of_all_128_LMIC_DALYs=100*sum(excluded_country_burden$DALY)/sum(daly_128_2023$DALY),
+  VLW_status="Not estimable because 2023 GDP inputs required for VSL transfer are missing")
+write_csv(bind_rows(excluded_country_burden,excluded_summary),
+          file.path(r3_dir,"R3_excluded_country_DALY_burden.csv"))
+write_csv(bind_rows(excluded_country_burden,excluded_summary),
+          file.path(submission_table_dir,
+            "Supplementary Table 7_excluded-country DALY burden.csv"))
+
+submission_table_notes <- c(
+  "# R3 revised tables",
+  "",
+  "This directory is generated by scripts/run_LMIC_Pancreatic_VLW_R3.R.",
+  "It contains the six main manuscript tables and nine supplementary tables",
+  "under the numbering and titles used in the revised manuscript.",
+  "",
+  "Key reporting policies:",
+  "- Historical aggregate values are point estimates; marginal GBD lower/upper bounds are not summed.",
+  "- DALY is forecast first and then monetised with fixed 2023 income-group effective VSLYs.",
+  "- Reported prediction intervals are explicit 95% PIs.",
+  "- All-LMIC PIs use 50,000 joint paths preserving empirical subgroup residual correlation.",
+  "- Monetary results are in billion constant-2023 USD unless otherwise stated.",
+  "- IE = 0.5, 1.0, and 1.5 are valuation scenarios, not statistical uncertainty bounds."
+)
+writeLines(submission_table_notes,file.path(submission_table_dir,"README.md"))
 
 # ======================================================================
 # 5. RECONCILIATION + PROVENANCE + SESSION INFO  (reviewers M1/M5/M6, m1/m3/m4)
 # ======================================================================
 recon_tbl <- bind_rows(recon_log)
 write_csv(recon_tbl, file.path(diag_dir,"Reconciliation_checks.csv"))
-write_csv(bind_rows(ets_diag_all), file.path(diag_dir,"ETS_diagnostics_all_IE.csv"))
+write_csv(bind_rows(ets_diag_all), file.path(diag_dir,"Forecast_diagnostics_all_IE.csv"))
 
 cov <- tibble(
   item=c("LMIC countries in 204_with_LMIC.csv (LMIC==1)",
@@ -636,11 +964,12 @@ prov <- c(
   "",
   "- Disease burden: GBD 2023 (Global Burden of Disease Study 2023), pancreatic cancer DALYs,",
   "  Number + Age-standardized Rate, 1990-2023, both sexes and sex-specific, by 5-year age group.",
-  "  Source file: Pancreatic/merged.csv (extracted from IHME GBD Results Tool).",
-  "- HALE: GBD 2023 health-adjusted life expectancy, 2023, by sex and age. Source: DM/LMICDM/HALE.csv.",
+  "  Source files: data_raw/gbd_daly_yearly/measure2_DALYs_year1990.csv through year2023.csv",
+  "  (annual exports from the IHME GBD Results Tool; the canonical workflow reads these files directly).",
+  "- HALE: GBD 2023 health-adjusted life expectancy, 2023, by sex and age. Source: data_raw/external_metadata/HALE.csv.",
   "- GDP per capita & total (PPP, current international $), 2023: World Bank World Development Indicators",
-  "  (NY.GDP.PCAP.PP.CD, NY.GDP.MKTP.PP.CD). Source: DM/LMICDM/gdp.csv.",
-  "- Income classification (LIC/LMIC/UMIC) & LMIC flag: DM/LMICDM/204_with_LMIC.csv (World Bank FY24).",
+  "  (NY.GDP.PCAP.PP.CD, NY.GDP.MKTP.PP.CD). Source: data_raw/external_metadata/gdp.csv.",
+  "- Income classification (LIC/LMIC/UMIC) & LMIC flag: data_raw/external_metadata/204_with_LMIC.csv (World Bank FY24).",
   "- VSL reference: US DOT 2023 guidance, VSL = US$13.2 million; US GDP pc (PPP) 2023 = US$82,304.62.",
   "",
   paste0("Extraction/analysis date: ", format(Sys.Date())),
@@ -650,18 +979,27 @@ prov <- c(
   "  with T_i = HALE_i (sex-specific, all-ages) and base r = 0.03. An undiscounted variant (r = 0,",
   "  VSLY = VSL_i / HALE_i) is reported as sensitivity.",
   "- VLW = VSLY x DALY, applied uniformly to every age; age/sex/income totals are obtained by",
-  "  summation, so age-specific VLW (Table 6) sums exactly to the headline total (Table 1), and",
+  "  summation, so age-specific VLW (manuscript Table 4; generated as Table6_age_specific.csv)",
+  "  sums exactly to the headline total (Table 1), and",
   "  both-sex = male + female (Tables 1, 2).",
   "- Because VSLY is uniform across ages, age-specific VLW is proportional to age-specific DALYs;",
   "  the earlier 'VLW peaks at 70-74' result was an artefact of an inconsistent age denominator and",
   "  is not reported.",
   "",
+  "# R3 forecast and uncertainty policy",
+  "- Historical aggregate 95% UIs are not reported because matched GBD draws are unavailable; marginal bounds are never summed.",
+  "- DALY is the primary projection estimand. Projected DALYs are monetized with fixed 2023 group effective VSLY values.",
+  "- ETS and non-seasonal ARIMA are both projected to 2050. All forecast calls set level=95 explicitly.",
+  "- All-LMIC PIs use joint simulation with empirical residual correlation; subgroup endpoints are never summed.",
+  "- The income-group rate panel is the unweighted mean of country-specific age-standardized rates.",
+  "",
   "# Software (reviewer m3)",
   paste0("- ", R.version.string),
   paste0("- forecast ", as.character(packageVersion("forecast")),
          "; tidyverse ", as.character(packageVersion("tidyverse")),
-         "; sf ", as.character(packageVersion("sf"))),
-  "- ETS: forecast::ets(model='AAN', damped=TRUE); diagnostics in diagnostics/ETS_diagnostics_all_IE.csv")
+         "; sf ", as.character(packageVersion("sf")),
+         "; sandwich ",as.character(packageVersion("sandwich"))),
+  "- Forecast diagnostics: outputs/results_VLW/diagnostics/Forecast_diagnostics_all_IE.csv")
 writeLines(prov, file.path(diag_dir,"PROVENANCE_and_METHODS.md"))
 capture.output(sessionInfo(), file=file.path(diag_dir,"sessionInfo.txt"))
 
