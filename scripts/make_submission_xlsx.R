@@ -26,7 +26,7 @@
 # ==============================================================================
 
 suppressPackageStartupMessages({
-  library(readr); library(writexl)
+  library(readr); library(writexl); library(zip)
 })
 # Note: writexl is used rather than openxlsx. openxlsx writes relationships in sheet1.xml.rels
 # pointing at drawings/drawing1.xml and drawings/vmlDrawing1.vml without placing those files in
@@ -188,6 +188,28 @@ as_col <- function(x) {
 # to text, making them non-computable. 34 cells are affected (32 in Supp 6, 2 in Supp 8); an empty
 # cell carries the same "missing" meaning and preserves the numeric type of the column.
 
+# -- Remove CJK script-fallback fonts from the OOXML theme --------------------------------------
+# Every OOXML file carries a default theme that declares East Asian fallback typefaces
+# (<a:font script="Hans" typeface="SimSun"/> and similar, written with the native font names).
+# They are boilerplate rather than content, but they leave non-ASCII strings inside the archive.
+# This strips any <a:font> element whose typeface is not plain ASCII; Office falls back to system
+# defaults when a script-specific font is absent, so rendering is unaffected.
+strip_cjk_theme <- function(path) {
+  tmp <- file.path(tempdir(), paste0("x_", tools::file_path_sans_ext(basename(path))))
+  unlink(tmp, recursive = TRUE); dir.create(tmp, recursive = TRUE)
+  utils::unzip(path, exdir = tmp)
+  th <- file.path(tmp, "xl", "theme", "theme1.xml")
+  if (file.exists(th)) {
+    x <- paste(readLines(th, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
+    x <- gsub('<a:font script="[^"]*" typeface="[^"]*[^\\x20-\\x7E][^"]*"/>', '', x, perl = TRUE)
+    con <- file(th, open = "wb"); writeBin(charToRaw(x), con); close(con)
+  }
+  zip::zip(zipfile = normalizePath(path, mustWork = FALSE),
+           files = list.files(tmp, recursive = TRUE, all.files = TRUE, no.. = TRUE),
+           root = tmp)
+  invisible(path)
+}
+
 cat("Source CSVs: ", CSV_DIR, "\nOutput     : ", OUT_DIR, "\n\n", sep = "")
 n_num <- 0L
 for (s in spec) {
@@ -205,8 +227,9 @@ for (s in spec) {
   n_num <- n_num + sum(vapply(d, is.numeric, logical(1)))
   names(d) <- s$header
 
-  write_xlsx(setNames(list(d), "Sheet1"), file.path(OUT_DIR, s$out),
-             format_headers = TRUE)
+  out_path <- file.path(OUT_DIR, s$out)
+  write_xlsx(setNames(list(d), "Sheet1"), out_path, format_headers = TRUE)
+  strip_cjk_theme(out_path)
 
   cat(sprintf("  %-30s <- %-58s %3d rows x %2d cols\n", s$out, s$csv, nrow(d), ncol(d)))
 }
