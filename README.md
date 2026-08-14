@@ -98,7 +98,3 @@ Diagnostics, coverage logs, provenance notes and `sessionInfo.txt` are written t
 
 R 4.2.2 on aarch64-apple-darwin20 (macOS 14.5), with tidyverse 2.0.0, ggplot2 3.5.1, sf 1.0-16,
 forecast 8.21.1, patchwork 1.2.0 and scales 1.3.0.
-
-All random seeds are fixed in the scripts, so the outputs are deterministic. String literals that
-are not ASCII are written as `\uXXXX` escapes, so results are byte-identical under a UTF-8 locale
-and under `LC_ALL=C`.
