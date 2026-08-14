@@ -4,8 +4,8 @@
 #
 # Manuscript figure: Figure 3
 # Valuation scenario: IE = 1.0
-# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 790-807
-# Shared preamble  : _common.R (= canonical script lines 1-348)
+# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 794-811
+# Shared preamble  : _common.R (= canonical script lines 1-352)
 # Output           : fig/Figure 3 unweighted mean country ASR and fold change.pdf
 #
 # Only two things differ from the canonical script: (1) the two-space for-loop indent is
@@ -24,7 +24,7 @@
 FIG_CODE_DIR <- .self_path()
 source(file.path(FIG_CODE_DIR, "_common.R"))
 
-# ---- Scenario and data preparation (canonical script lines 356-366) ----
+# ---- Scenario and data preparation (canonical script lines 366-369) ----
 ie      <- 1.0
 ie_tag  <- paste0("IE", gsub("\\.", "", as.character(ie)))
 ie_lab  <- format(ie, nsmall = 1)
@@ -36,7 +36,7 @@ d23_all <- df %>% filter(year==2023)
 
 OUT <- file.path(FIG_DIR, "Figure 3 unweighted mean country ASR and fold change.pdf")
 
-# ---- Plot (canonical script lines 790-807) ----
+# ---- Plot (canonical script lines 794-811) ----
 # Figure 6 — explicitly labelled unweighted mean of country ASRs + fold change
 asr_t <- df_daly_rate %>% filter(sex_name=="Both",location_id %in% lmic_ids) %>%
   left_join(df_econ %>% select(location_id,LMIC_group),by="location_id") %>%

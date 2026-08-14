@@ -4,8 +4,8 @@
 #
 # Manuscript figure: Figure 7
 # Valuation scenario: IE = 0.5 / 1.0 / 1.5 (all three shown together)
-# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 845-856 (outside the IE loop)
-# Shared preamble  : _common.R (= canonical script lines 1-348)
+# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 849-860 (outside the IE loop)
+# Shared preamble  : _common.R (= canonical script lines 1-352)
 # Output           : fig/Figure 7 IE sensitivity.pdf
 #
 # Only two things differ from the canonical script: (1) the two-space for-loop indent is
@@ -26,7 +26,7 @@ source(file.path(FIG_CODE_DIR, "_common.R"))
 
 OUT <- file.path(FIG_DIR, "Figure 7 IE sensitivity.pdf")
 
-# ---- Plot (canonical script lines 845-856) ----
+# ---- Plot (canonical script lines 849-860) ----
 ie_bar <- map_dfr(ie_values, function(ie) {
   compute_allages(ie) %>% filter(year==2023,sex_name=="Both") %>% group_by(LMIC_group) %>%
     summarise(V=sum(VLW),.groups="drop") %>%

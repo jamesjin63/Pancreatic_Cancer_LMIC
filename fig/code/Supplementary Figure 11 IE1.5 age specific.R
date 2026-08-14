@@ -4,8 +4,8 @@
 #
 # Manuscript figure: Supplementary Figure 11
 # Valuation scenario: IE = 1.5
-# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 587-610
-# Shared preamble  : _common.R (= canonical script lines 1-348)
+# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 590-613
+# Shared preamble  : _common.R (= canonical script lines 1-352)
 # Output           : fig/Supplementary Figure 11 IE1.5 age specific.pdf
 #
 # Only two things differ from the canonical script: (1) the two-space for-loop indent is
@@ -24,7 +24,7 @@
 FIG_CODE_DIR <- .self_path()
 source(file.path(FIG_CODE_DIR, "_common.R"))
 
-# ---- Scenario and data preparation (canonical script lines 356-366) ----
+# ---- Scenario and data preparation (canonical script lines 366-369) ----
 ie      <- 1.5
 ie_tag  <- paste0("IE", gsub("\\.", "", as.character(ie)))
 ie_lab  <- format(ie, nsmall = 1)
@@ -36,7 +36,7 @@ d23_all <- df %>% filter(year==2023)
 
 OUT <- file.path(FIG_DIR, "Supplementary Figure 11 IE1.5 age specific.pdf")
 
-# ---- Plot (canonical script lines 587-610) ----
+# ---- Plot (canonical script lines 590-613) ----
 # Figure 4 — age-specific (VLW now proportional to DALYs)
 age_all <- df_av %>% filter(sex_name=="Both") %>% group_by(age_name,age_mid,age_order) %>%
   summarise(V=sum(VLW_a),.groups="drop") %>% arrange(age_order)

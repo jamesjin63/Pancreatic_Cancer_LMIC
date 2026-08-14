@@ -4,8 +4,8 @@
 #
 # Manuscript figure: Figure 6
 # Valuation scenario: IE = 1.0
-# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 759-788; forecast objects from lines 612-647
-# Shared preamble  : _common.R (= canonical script lines 1-348)
+# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 763-792; forecast objects from lines 615-651
+# Shared preamble  : _common.R (= canonical script lines 1-352)
 # Output           : fig/Figure 6 forecast 2050.pdf
 #
 # Only two things differ from the canonical script: (1) the two-space for-loop indent is
@@ -24,7 +24,7 @@
 FIG_CODE_DIR <- .self_path()
 source(file.path(FIG_CODE_DIR, "_common.R"))
 
-# ---- Scenario and data preparation (canonical script lines 356-366) ----
+# ---- Scenario and data preparation (canonical script lines 366-369) ----
 ie      <- 1.0
 ie_tag  <- paste0("IE", gsub("\\.", "", as.character(ie)))
 ie_lab  <- format(ie, nsmall = 1)
@@ -36,25 +36,26 @@ d23_all <- df %>% filter(year==2023)
 
 OUT <- file.path(FIG_DIR, "Figure 6 forecast 2050.pdf")
 
-# ---- Forecast objects (canonical script lines 612-647) ----
+# ---- Forecast objects (canonical script lines 615-651) ----
 # ════════ FORECAST to 2050: DALY is the primary estimand (R3 Comments 2-5) ════════
 fc_inc_raw <- df %>% filter(sex_name=="Both") %>% group_by(LMIC_group,year) %>%
   summarise(V=sum(VLW),D=sum(DALY),.groups="drop")
 vsly_group_2023 <- fc_inc_raw %>% filter(year==2023) %>%
   transmute(LMIC_group,VSLY_effective=V*1e9/D)
-primary_ets <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ETS",seed=20260724L)
-primary_arima <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ARIMA",seed=20260725L)
+proj_ets   <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ETS",seed=20260724L)
+proj_arima <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ARIMA",seed=20260725L)
+primary <- proj_arima   # ARIMA is the primary model; ETS is the sensitivity model
 
 obs_all <- fc_inc_raw %>% group_by(year) %>% summarise(V=sum(V),D=sum(D),.groups="drop") %>%
   mutate(Vl=NA_real_,Vh=NA_real_,Dl=NA_real_,Dh=NA_real_,type="Observed")
-pred_all <- primary_ets$all %>% transmute(year=Year,V=VLW_billion,
+pred_all <- primary$all %>% transmute(year=Year,V=VLW_billion,
   Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,D=DALY,
   Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
 fc_all <- bind_rows(obs_all,pred_all)
 
 obs_inc <- fc_inc_raw %>% transmute(LMIC_group,year,V,D,Vl=NA_real_,Vh=NA_real_,
                                     Dl=NA_real_,Dh=NA_real_,type="Observed")
-pred_inc <- primary_ets$groups %>% transmute(LMIC_group=Group,year=Year,
+pred_inc <- primary$groups %>% transmute(LMIC_group=Group,year=Year,
   V=VLW_billion,Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,
   D=DALY,Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
 fc_inc <- bind_rows(obs_inc,pred_inc)
@@ -64,7 +65,7 @@ fc_sex_raw <- df %>% filter(sex_name %in% c("Male","Female")) %>%
   group_by(sex_name,year) %>% summarise(V=sum(VLW),.groups="drop")
 sex_fits <- setNames(lapply(c("Male","Female"),function(sx) {
   x <- fc_sex_raw %>% filter(sex_name==sx) %>% arrange(year) %>% pull(V)
-  fit_series(x,"ETS",label=paste(ie_tag,"VLW",sx,sep="|"))
+  fit_series(x,"ARIMA",label=paste(ie_tag,"VLW",sx,sep="|"))
 }),c("Male","Female"))
 fc_sex <- bind_rows(lapply(names(sex_fits),function(sx) {
   s <- fc_sex_raw %>% filter(sex_name==sx)
@@ -74,7 +75,7 @@ fc_sex <- bind_rows(lapply(names(sex_fits),function(sx) {
            Vl=as.numeric(z$lower[,1]),Vh=as.numeric(z$upper[,1]),type="Forecast"))
 }))
 
-# ---- Plot (canonical script lines 759-788) ----
+# ---- Plot (canonical script lines 763-792) ----
 # Figure 5 — forecast
 p5a <- ggplot(fc_all,aes(year,V))+
   geom_ribbon(data=fc_all %>% filter(type=="Forecast"),aes(ymin=Vl,ymax=Vh),fill=pal$red,alpha=0.12)+
