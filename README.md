@@ -12,7 +12,6 @@ cancer across 122 low- and middle-income countries from 1990 to 2023, and projec
 |---|---|
 | `scripts/` | The complete analysis: entry point, canonical implementation, submission-table builder, and the additional reviewer-requested analyses |
 | `fig/` | The 19 manuscript figures under their manuscript names, plus a standalone script for each one (see `fig/README.md`) |
-| `RUN_LOG_2026-08-14.txt` | Console log of a full pipeline run |
 | `LICENSE` | Licence |
 
 **Input data are not redistributed here.** `data_raw/` and the generated `outputs/` are excluded;
