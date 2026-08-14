@@ -101,11 +101,11 @@ gbd_to_wb <- c(
   "Saint Lucia"="St. Lucia","Saint Vincent and the Grenadines"="St. Vincent and the Grenadines",
   "Somalia"="Somalia, Fed. Rep.","Syrian Arab Republic"="Syrian Arab Republic",
   "Türkiye"="Turkiye","United Republic of Tanzania"="Tanzania","Yemen"="Yemen, Rep.")
-norm_name <- function(x) x %>% str_replace_all("[‘’]","'") %>%
-  str_replace_all(" "," ") %>% str_squish() %>% str_to_lower()
+norm_name <- function(x) x %>% str_replace_all("[\u2018\u2019]","'") %>%
+  str_replace_all("\u00a0"," ") %>% str_squish() %>% str_to_lower()
 fmt_ui <- function(v,lo,hi,d=1,s=1) paste0(
   formatC(v/s,format="f",digits=d,big.mark=",")," (",
-  formatC(lo/s,format="f",digits=d,big.mark=","),"–",
+  formatC(lo/s,format="f",digits=d,big.mark=","),"\u2013",
   formatC(hi/s,format="f",digits=d,big.mark=","),")")
 
 std_ages <- c("<5 years","5-9 years","10-14 years","15-19 years","20-24 years",
