@@ -1,3 +1,0 @@
-reporting_level,interval_status,prohibited_operation,manuscript_action
-GBD source row (country-sex or country-age),GBD-reported marginal 95% UI may be retained at the original reporting level,None,Country-level source intervals may be described as GBD-reported
-"Any sum across countries, sexes, or ages",No 95% UI reported because matched draws are unavailable,Do not sum marginal 2.5th and 97.5th percentiles,Report point estimates and separate IE=0.5-1.5 valuation sensitivity only
