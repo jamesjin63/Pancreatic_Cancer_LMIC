@@ -4,8 +4,8 @@
 #
 # Manuscript figure: Supplementary Figure 2
 # Valuation scenario: IE = 0.5
-# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 545-568
-# Shared preamble  : _common.R (= canonical script lines 1-348)
+# Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 548-571
+# Shared preamble  : _common.R (= canonical script lines 1-352)
 # Output           : fig/Supplementary Figure 2 IE0.5 trends.pdf
 #
 # Only two things differ from the canonical script: (1) the two-space for-loop indent is
@@ -24,7 +24,7 @@
 FIG_CODE_DIR <- .self_path()
 source(file.path(FIG_CODE_DIR, "_common.R"))
 
-# ---- Scenario and data preparation (canonical script lines 356-366) ----
+# ---- Scenario and data preparation (canonical script lines 366-369) ----
 ie      <- 0.5
 ie_tag  <- paste0("IE", gsub("\\.", "", as.character(ie)))
 ie_lab  <- format(ie, nsmall = 1)
@@ -36,7 +36,7 @@ d23_all <- df %>% filter(year==2023)
 
 OUT <- file.path(FIG_DIR, "Supplementary Figure 2 IE0.5 trends.pdf")
 
-# ---- Plot (canonical script lines 545-568) ----
+# ---- Plot (canonical script lines 548-571) ----
 # Figure 2 — temporal
 tot_t <- df %>% filter(sex_name=="Both") %>% group_by(year) %>%
   summarise(V=sum(VLW),.groups="drop")

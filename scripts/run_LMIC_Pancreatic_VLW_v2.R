@@ -10,7 +10,10 @@
 #   3. Every reported forecast interval explicitly uses level = 95.
 #   4. All-LMIC prediction intervals use 50,000 joint paths with empirical
 #      residual correlation; subgroup interval endpoints are never summed.
-#   5. ETS is the primary model and non-seasonal ARIMA is a sensitivity model.
+#   5. Non-seasonal ARIMA is the primary model and damped-trend ETS is the
+#      sensitivity model. Selected by a prespecified rule (lowest pooled
+#      rolling-origin MAPE subject to Ljung-Box residual adequacy); see
+#      scripts/run_R5_reviewer_analyses.R.
 #   6. The rate panel is the unweighted mean of country-specific ASRs.
 #
 # The workflow also uses one consistent discounted-annuity VSLY definition,
@@ -614,19 +617,20 @@ for (ie in ie_values) {
     summarise(V=sum(VLW),D=sum(DALY),.groups="drop")
   vsly_group_2023 <- fc_inc_raw %>% filter(year==2023) %>%
     transmute(LMIC_group,VSLY_effective=V*1e9/D)
-  primary_ets <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ETS",seed=20260724L)
-  primary_arima <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ARIMA",seed=20260725L)
+  proj_ets   <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ETS",seed=20260724L)
+  proj_arima <- joint_income_projection(fc_inc_raw,vsly_group_2023,"ARIMA",seed=20260725L)
+  primary <- proj_arima   # ARIMA is the primary model; ETS is the sensitivity model
 
   obs_all <- fc_inc_raw %>% group_by(year) %>% summarise(V=sum(V),D=sum(D),.groups="drop") %>%
     mutate(Vl=NA_real_,Vh=NA_real_,Dl=NA_real_,Dh=NA_real_,type="Observed")
-  pred_all <- primary_ets$all %>% transmute(year=Year,V=VLW_billion,
+  pred_all <- primary$all %>% transmute(year=Year,V=VLW_billion,
     Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,D=DALY,
     Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
   fc_all <- bind_rows(obs_all,pred_all)
 
   obs_inc <- fc_inc_raw %>% transmute(LMIC_group,year,V,D,Vl=NA_real_,Vh=NA_real_,
                                       Dl=NA_real_,Dh=NA_real_,type="Observed")
-  pred_inc <- primary_ets$groups %>% transmute(LMIC_group=Group,year=Year,
+  pred_inc <- primary$groups %>% transmute(LMIC_group=Group,year=Year,
     V=VLW_billion,Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,
     D=DALY,Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
   fc_inc <- bind_rows(obs_inc,pred_inc)
@@ -636,7 +640,7 @@ for (ie in ie_values) {
     group_by(sex_name,year) %>% summarise(V=sum(VLW),.groups="drop")
   sex_fits <- setNames(lapply(c("Male","Female"),function(sx) {
     x <- fc_sex_raw %>% filter(sex_name==sx) %>% arrange(year) %>% pull(V)
-    fit_series(x,"ETS",label=paste(ie_tag,"VLW",sx,sep="|"))
+    fit_series(x,"ARIMA",label=paste(ie_tag,"VLW",sx,sep="|"))
   }),c("Male","Female"))
   fc_sex <- bind_rows(lapply(names(sex_fits),function(sx) {
     s <- fc_sex_raw %>% filter(sex_name==sx)
@@ -646,7 +650,7 @@ for (ie in ie_values) {
              Vl=as.numeric(z$lower[,1]),Vh=as.numeric(z$upper[,1]),type="Forecast"))
   }))
 
-  diags <- bind_rows(primary_ets$diagnostics,primary_arima$diagnostics,
+  diags <- bind_rows(proj_arima$diagnostics,proj_ets$diagnostics,
                      bind_rows(lapply(sex_fits,`[[`,"diag"))) %>% mutate(IE=ie,.before=1)
   ets_diag_all[[ie_tag]] <- diags
   write_csv(diags,file.path(ie_dir,"Stats_forecast_diagnostics.csv"))
@@ -654,17 +658,17 @@ for (ie in ie_values) {
 
   # Forecast tables: all-LMIC PIs come from joint simulation, never summed endpoints.
   fc_yrs <- c(2025,2030,2035,2040,2045,2050)
-  t7 <- bind_rows(primary_ets$all,primary_ets$groups,primary_arima$all,primary_arima$groups) %>%
+  t7 <- bind_rows(proj_arima$all,proj_arima$groups,proj_ets$all,proj_ets$groups) %>%
     filter(Year %in% fc_yrs) %>% arrange(Year,model,Group)
   write_csv(t7,file.path(ie_dir,"Table7_forecast_summary.csv"))
-  write_csv(bind_rows(primary_ets$all,primary_arima$all),file.path(ie_dir,"Table8_forecast_annual.csv"))
+  write_csv(bind_rows(proj_arima$all,proj_ets$all),file.path(ie_dir,"Table8_forecast_annual.csv"))
 
   if (ie==ie_base) {
     main_t5 <- bind_rows(
       t7 %>% filter(Group=="All LMICs") %>%
-        arrange(Year,factor(model,levels=c("ETS","ARIMA"))),
+        arrange(Year,factor(model,levels=c("ARIMA","ETS"))),
       t7 %>% filter(Year==2050,Group!="All LMICs") %>%
-        arrange(factor(model,levels=c("ETS","ARIMA")),
+        arrange(factor(model,levels=c("ARIMA","ETS")),
                 factor(Group,levels=income_fct))
     ) %>% transmute(
       Model=model,Year,Group,
@@ -676,7 +680,7 @@ for (ie in ie_values) {
     )
     write_csv(main_t5,file.path(submission_table_dir,
       "Main Table 5_selected projections.csv"))
-    write_csv(bind_rows(primary_ets$all,primary_arima$all),
+    write_csv(bind_rows(proj_arima$all,proj_ets$all),
       file.path(submission_table_dir,
         "Supplementary Table 3_annual ETS and ARIMA projections.csv"))
 
@@ -744,7 +748,7 @@ for (ie in ie_values) {
         tibble(model=m,Year=2024:2050,Group=g,direct_VLW_billion=as.numeric(z$fc$mean))
       })
     })
-    primary_rows <- bind_rows(primary_ets$groups,primary_arima$groups) %>%
+    primary_rows <- bind_rows(proj_arima$groups,proj_ets$groups) %>%
       select(model,Year,Group,derived_VLW_billion=VLW_billion)
     reconciliation <- primary_rows %>% left_join(direct_rows,by=c("model","Year","Group")) %>%
       mutate(difference_billion=direct_VLW_billion-derived_VLW_billion,
@@ -752,7 +756,7 @@ for (ie in ie_values) {
     write_csv(reconciliation,file.path(r3_dir,"R3_projection_reconciliation.csv"))
     write_csv(reconciliation,file.path(submission_table_dir,
       "Supplementary Table 6_projection reconciliation.csv"))
-    write_csv(bind_rows(primary_ets$all,primary_arima$all),
+    write_csv(bind_rows(proj_arima$all,proj_ets$all),
               file.path(r3_dir,"R3_primary_ETS_ARIMA_all_LMIC_projection.csv"))
   }
 

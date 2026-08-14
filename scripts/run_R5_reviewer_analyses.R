@@ -9,8 +9,8 @@
 #   Comment 3: tabulated sex-specific 2050 projections and reconciliation with the primary estimand
 #   Comment 6: exclusion fractions by income group, on both a country count and a DALY basis
 #
-# Data and functions are reused from run_LMIC_Pancreatic_VLW_v2.R lines 1-348; no computation
-# logic is reimplemented here.
+# Data and functions are reused from the canonical script preamble; no computation logic is
+# reimplemented here.
 #
 # Run:     Rscript scripts/run_R5_reviewer_analyses.R
 # Output:  outputs/R5/
@@ -24,9 +24,14 @@
 CODE_DIR <- normalizePath(file.path(.self(), ".."))
 setwd(CODE_DIR)
 
-# -- Load the canonical script preamble (lines 1-348) ------------------------------------------
+# -- Load the canonical script preamble ---------------------------------------------------------
 .src <- readLines(file.path("scripts", "run_LMIC_Pancreatic_VLW_v2.R"))
-eval(parse(text = paste(.src[1:348], collapse = "\n")), envir = globalenv())
+# The preamble is everything before the "3. LOOP OVER IE" section header. Locating it by marker
+# rather than by a hard-coded line number keeps this robust when the canonical script is edited.
+.mark <- grep("^# 3\\. LOOP OVER IE", .src)
+if (length(.mark) != 1L) stop("Could not locate the section-3 marker in the canonical script.")
+.preamble <- .src[seq_len(.mark - 2L)]
+eval(parse(text = paste(.preamble, collapse = "\n")), envir = globalenv())
 
 R5_DIR <- file.path("outputs", "R5")
 dir.create(R5_DIR, showWarnings = FALSE, recursive = TRUE)
@@ -146,13 +151,15 @@ cat("\n  -- Overall model ranking --\n"); print(as.data.frame(skill), row.names 
 cat("\n[2] Sex-specific 2050 projections and reconciliation ...\n")
 vsly_2023 <- inc_raw %>% filter(year == 2023) %>%
   transmute(LMIC_group, VSLY_effective = V * 1e9 / D)
-primary <- joint_income_projection(inc_raw, vsly_2023, "ETS", seed = 20260724L)
+# ARIMA is the primary model (prespecified rule: lowest pooled rolling-origin MAPE subject to
+# Ljung-Box residual adequacy; it wins on 8/8 series and passes adequacy on 8/8).
+primary <- joint_income_projection(inc_raw, vsly_2023, "ARIMA", seed = 20260725L)
 
 sex_fc <- map_dfr(c("Male", "Female"), function(sx) {
   s <- sex_raw %>% filter(sex_name == sx) %>% arrange(year)
-  z <- fit_series(s$V, "ETS", label = paste("VLW", sx, sep = "|"))
+  z <- fit_series(s$V, "ARIMA", label = paste("VLW", sx, sep = "|"))
   i <- 2050 - 2023
-  tibble(Sex = sx, Year = 2050, Estimand = "Direct sex-specific VLW ETS forecast (secondary)",
+  tibble(Sex = sx, Year = 2050, Estimand = "Direct sex-specific VLW ARIMA forecast (secondary estimand)",
          VLW_billion = as.numeric(z$fc$mean[i]),
          VLW_lower_95_PI = as.numeric(z$fc$lower[i, 1]),
          VLW_upper_95_PI = as.numeric(z$fc$upper[i, 1]),
@@ -162,8 +169,8 @@ sex_fc <- map_dfr(c("Male", "Female"), function(sx) {
 prim_2050 <- primary$all %>% filter(Year == 2050)
 sex_sum <- sum(sex_fc$VLW_billion)
 recon <- tibble(
-  Quantity = c("Primary: DALY-derived VLW, all LMICs (ETS)",
-               "Secondary: direct sex-specific VLW ETS, Male + Female",
+  Quantity = c("Primary: DALY-derived VLW, all LMICs (ARIMA)",
+               "Secondary: direct sex-specific VLW ARIMA, Male + Female",
                "Absolute difference", "Relative difference (%)"),
   Value_billion = c(prim_2050$VLW_billion, sex_sum,
                     sex_sum - prim_2050$VLW_billion,
@@ -180,7 +187,7 @@ gap <- bind_rows(
     transmute(Year = year, Male, Female, Male_to_Female = Male / Female, Basis = "Observed"),
   tibble(Year = 2050, Male = sex_fc$VLW_billion[sex_fc$Sex == "Male"],
          Female = sex_fc$VLW_billion[sex_fc$Sex == "Female"]) %>%
-    mutate(Male_to_Female = Male / Female, Basis = "Secondary direct ETS forecast"))
+    mutate(Male_to_Female = Male / Female, Basis = "Secondary direct ARIMA forecast"))
 write_csv(gap, file.path(R5_DIR, "R5_sex_gap_over_time.csv"))
 print(as.data.frame(gap), row.names = FALSE)
 
@@ -220,9 +227,10 @@ writeLines(capture.output(sessionInfo()), file.path(R5_DIR, "sessionInfo.txt"))
 # ══════════════════════════════════════════════════════════════════════════════
 # 4. Comment 4 - sensitivity of the fixed within-group composition assumption
 # ══════════════════════════════════════════════════════════════════════════════
-# Country-sex VSLY is built from 2023 GDP and HALE and is therefore constant over time, so drift
+# Country-sex VSLY is built from 2023 GDP and HALE and is constant over time, so drift in
 #     Vbar_g,t = sum_i,s VLW_{i,s,t} * 1e9 / sum_i,s DALY_{i,s,t}
-# arises solely from shifts in within-group DALY composition. The 1990-2023 drift quantifies it.
+# Vbar_g,t arises solely from shifts in within-group DALY composition. The 1990-2023 drift
+# quantifies the assumption.
 cat("\n[4] Historical composition drift in the effective group VSLY ...\n")
 vbar <- df_base %>% filter(sex_name == "Both") %>%
   group_by(LMIC_group, year) %>%

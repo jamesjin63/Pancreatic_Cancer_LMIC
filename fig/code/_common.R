@@ -1,7 +1,7 @@
 # ==============================================================================
 # _common.R - shared preamble for every figure script
 #
-# Contents = scripts/run_LMIC_Pancreatic_VLW_v2.R lines 1-348, extracted verbatim:
+# Contents = scripts/run_LMIC_Pancreatic_VLW_v2.R lines 1-352, extracted verbatim:
 #   paths, reference constants, palettes/themes, helper functions, data loading (section 1),
 #   VLW computation (section 2), and the forecast helper functions.
 # Nothing is modified except the directory resolution below.
@@ -15,7 +15,7 @@ FIG_DIR  <- normalizePath(file.path(FIG_CODE_DIR, ".."))          # fig/
 dir.create(FIG_DIR, showWarnings=FALSE, recursive=TRUE)
 setwd(CODE_DIR)   # the canonical script reads data_raw/ relative to code/
 
-# ------------- verbatim from run_LMIC_Pancreatic_VLW_v2.R:1-348 below -------------
+# ------------- verbatim from run_LMIC_Pancreatic_VLW_v2.R:1-352 below -------------
 ################################################################################
 # LMIC Pancreatic Cancer — Value of Lost Welfare (VLW) Analysis — R3 CANONICAL WORKFLOW
 # GBD 2023 · 1990-2023 · Forecast to 2050 · IE = 0.5, 1.0, 1.5
@@ -28,7 +28,10 @@ setwd(CODE_DIR)   # the canonical script reads data_raw/ relative to code/
 #   3. Every reported forecast interval explicitly uses level = 95.
 #   4. All-LMIC prediction intervals use 50,000 joint paths with empirical
 #      residual correlation; subgroup interval endpoints are never summed.
-#   5. ETS is the primary model and non-seasonal ARIMA is a sensitivity model.
+#   5. Non-seasonal ARIMA is the primary model and damped-trend ETS is the
+#      sensitivity model. Selected by a prespecified rule (lowest pooled
+#      rolling-origin MAPE subject to Ljung-Box residual adequacy); see
+#      scripts/run_R5_reviewer_analyses.R.
 #   6. The rate panel is the unweighted mean of country-specific ASRs.
 #
 # The workflow also uses one consistent discounted-annuity VSLY definition,
@@ -119,11 +122,11 @@ gbd_to_wb <- c(
   "Saint Lucia"="St. Lucia","Saint Vincent and the Grenadines"="St. Vincent and the Grenadines",
   "Somalia"="Somalia, Fed. Rep.","Syrian Arab Republic"="Syrian Arab Republic",
   "Türkiye"="Turkiye","United Republic of Tanzania"="Tanzania","Yemen"="Yemen, Rep.")
-norm_name <- function(x) x %>% str_replace_all("[‘’]","'") %>%
-  str_replace_all(" "," ") %>% str_squish() %>% str_to_lower()
+norm_name <- function(x) x %>% str_replace_all("[\u2018\u2019]","'") %>%
+  str_replace_all("\u00a0"," ") %>% str_squish() %>% str_to_lower()
 fmt_ui <- function(v,lo,hi,d=1,s=1) paste0(
   formatC(v/s,format="f",digits=d,big.mark=",")," (",
-  formatC(lo/s,format="f",digits=d,big.mark=","),"–",
+  formatC(lo/s,format="f",digits=d,big.mark=","),"\u2013",
   formatC(hi/s,format="f",digits=d,big.mark=","),")")
 
 std_ages <- c("<5 years","5-9 years","10-14 years","15-19 years","20-24 years",
@@ -364,4 +367,5 @@ joint_income_projection <- function(history,vsly_2023,model=c("ETS","ARIMA"),
        diagnostics=bind_rows(lapply(fits,`[[`,"diag")),residual_correlation=corr,
        fits=fits)
 }
+
 # ---------------------------- end of shared preamble ----------------------------
