@@ -12,6 +12,7 @@ cancer across 122 low- and middle-income countries from 1990 to 2023, and projec
 |---|---|
 | `scripts/` | The complete analysis: entry point, canonical implementation, submission-table builder, and the additional reviewer-requested analyses |
 | `fig/` | The 19 manuscript figures under their manuscript names, plus a standalone script for each one (see `fig/README.md`) |
+| `table/` | Supplementary Tables 1-14 under their manuscript names, plus a standalone script for each one (see `table/README.md`) |
 | `LICENSE` | Licence |
 
 **Input data are not redistributed here.** `data_raw/` and the generated `outputs/` are excluded;
@@ -31,6 +32,7 @@ Rscript scripts/run_LMIC_Pancreatic_VLW_R3.R    # full analysis: figures, tables
 Rscript scripts/run_R5_reviewer_analyses.R      # additional validation analyses -> outputs/R5/
 Rscript scripts/make_submission_xlsx.R          # submission tables as xlsx
 Rscript "fig/code/make_all_figures.R"           # all 19 figures, or one script per figure
+Rscript "table/code/make_all_supplementary_tables.R" # Supplementary Tables 1-14
 ```
 
 The full pipeline takes about 20 s; the figure scripts about 65 s.
@@ -87,7 +89,7 @@ model choice reported in the manuscript.
 | Table 4 | `outputs/results_VLW/IE1/Table6_age_specific.csv` |
 | Table 5 | `outputs/results_VLW/IE1/Table7_forecast_summary.csv` |
 | Table 6 | `outputs/results_VLW/CrossIE_sensitivity_summary.csv` |
-| Main Tables 1–6, Supplementary Tables 1–9 | `outputs/R3_submission_tables/` (CSV) and `outputs/submission_tables_xlsx/` (xlsx) |
+| Main Tables 1–6, Supplementary Tables 1–14 | `outputs/R3_submission_tables/` and `outputs/R5/` (CSV); `outputs/submission_tables_xlsx/` and `table/` (xlsx) |
 | Figures 1–7, Supplementary Figures 1–12 | `fig/` (committed) and `outputs/R3_submission_figures/` (regenerated) |
 
 Diagnostics, coverage logs, provenance notes and `sessionInfo.txt` are written to
