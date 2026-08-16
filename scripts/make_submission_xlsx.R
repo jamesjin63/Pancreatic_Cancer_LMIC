@@ -25,6 +25,11 @@
 #   Rscript scripts/make_submission_xlsx.R <output-dir>
 # ==============================================================================
 
+# Some launch environments export C.UTF-8, which is not a valid macOS locale. R then falls back to
+# plain C and cannot address this package when a parent directory contains non-ASCII characters.
+# Set a known macOS UTF-8 locale before resolving paths; numeric parsing below remains explicit.
+try(Sys.setlocale("LC_CTYPE", "en_US.UTF-8"), silent = TRUE)
+
 suppressPackageStartupMessages({
   library(readr); library(writexl); library(zip)
 })
@@ -39,10 +44,20 @@ suppressPackageStartupMessages({
   if (length(a) != 1L) return(normalizePath("."))
   dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", a), fixed = TRUE)))
 }
-CODE_DIR <- normalizePath(file.path(.self(), ".."))
+CODE_DIR <- if (exists("CODE_DIR_OVERRIDE", inherits = FALSE)) {
+  normalizePath(CODE_DIR_OVERRIDE)
+} else {
+  normalizePath(file.path(.self(), ".."))
+}
 CSV_DIR  <- file.path(CODE_DIR, "outputs", "R3_submission_tables")
 args     <- commandArgs(trailingOnly = TRUE)
-OUT_DIR  <- if (length(args) >= 1L) args[1] else file.path(CODE_DIR, "outputs", "submission_tables_xlsx")
+OUT_DIR  <- if (exists("OUT_DIR_OVERRIDE", inherits = FALSE)) {
+  OUT_DIR_OVERRIDE
+} else if (length(args) >= 1L) {
+  args[1]
+} else {
+  file.path(CODE_DIR, "outputs", "submission_tables_xlsx")
+}
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 if (!dir.exists(CSV_DIR))
@@ -168,8 +183,81 @@ spec <- list(
        csv = "Supplementary Table 9_unweighted country ASR means.csv",
        keep = c("LMIC_group", "year", "R"),
        header = c("Income group", "Year",
-                  "Mean country-specific age-standardized DALY rate (per 100,000 population)"))
+                  "Mean country-specific age-standardized DALY rate (per 100,000 population)")),
+
+  # -- Added at R5 (Reviewer #3, comment 2): rolling-origin validation over multiple origins,
+  # with the naive and drift benchmarks, MASE, and empirical 95% PI coverage. Source lives in
+  # outputs/R5/ because it is produced by scripts/run_R5_reviewer_analyses.R.
+  list(out = "Supplementary Table 10.xlsx", dir = "R5",
+       csv = "R5_rolling_origin_supplementary_table.csv",
+       keep = c("Panel", "Model", "Role", "Stratum", "Origins", "Forecasts",
+                "MAPE", "MASE", "Coverage of the 95% PI"),
+       header = c("Panel", "Model", "Model role", "Stratum", "Rolling origins",
+                  "Forecast-actual pairs", "MAPE (%)", "MASE",
+                  "Empirical coverage of the 95% prediction interval (%)")),
+
+  list(out = "Supplementary Table 11.xlsx", dir = "R5",
+       csv = "R5_rolling_origin_by_series.csv",
+       keep = c("series", "outcome", "model", "n_origins", "n_obs", "MAE", "RMSE",
+                "MAPE", "MASE", "coverage_95"),
+       header = c("Series", "Outcome", "Model", "Rolling origins", "Forecast-actual pairs",
+                  "MAE", "RMSE", "MAPE (%)", "MASE",
+                  "Empirical coverage of the 95% prediction interval (%)")),
+
+  list(out = "Supplementary Table 12.xlsx", dir = "R5",
+       csv = "R5_full_sample_residual_adequacy.csv",
+       keep = c("series", "outcome", "model", "method", "alpha", "beta", "phi", "sigma2",
+                "AIC", "AICc", "BIC", "RMSE", "Ljung_Box_lag", "Ljung_Box_fitdf",
+                "Ljung_Box_p", "residual_autocorrelation_signal"),
+       header = c("Series", "Outcome", "Model", "Method", "alpha", "beta", "phi",
+                  "Error variance (sigma2)", "AIC", "AICc", "BIC", "RMSE",
+                  "Ljung-Box lag", "Ljung-Box degrees of freedom", "Ljung-Box p value",
+                  "Residual autocorrelation signal")),
+
+  list(out = "Supplementary Table 13.xlsx", sheets = list(
+    list(sheet = "A - Sex-specific 2050", dir = "R5", csv = "R5_sex_specific_2050.csv",
+         keep = c("Sex", "Year", "Estimand", "VLW_billion", "VLW_lower_95_PI",
+                  "VLW_upper_95_PI", "Ljung_Box_p", "residual_autocorrelation_signal"),
+         header = c("Sex", "Year", "Estimand", "VLW (billion constant-2023 USD)",
+                    "VLW lower 95% PI (billion constant-2023 USD)",
+                    "VLW upper 95% PI (billion constant-2023 USD)", "Ljung-Box p value",
+                    "Residual autocorrelation signal")),
+    list(sheet = "B - Reconciliation", dir = "R5", csv = "R5_sex_reconciliation_2050.csv",
+         keep = c("Quantity", "Value_billion"),
+         header = c("Quantity", "Value (billion constant-2023 USD, except relative difference)"))
+  )),
+
+  list(out = "Supplementary Table 14.xlsx", sheets = list(
+    list(sheet = "A - Effective VSLY", dir = "R5", csv = "R5_effective_group_VSLY_by_year.csv",
+         keep = c("LMIC_group", "year", "Vbar"),
+         header = c("Income group", "Year",
+                    "Effective group VSLY (constant-2023 USD per DALY)")),
+    list(sheet = "B - Composition drift", dir = "R5",
+         csv = "R5_fixed_composition_sensitivity.csv",
+         keep = c("LMIC_group", "Vbar_1990", "Vbar_2023", "change_1990_2023_pct",
+                  "annualised_drift_pct", "min", "max", "implied_27yr_drift_pct"),
+         header = c("Income group", "Effective VSLY in 1990", "Effective VSLY in 2023",
+                    "Change, 1990-2023 (%)", "Annualised composition drift (%)",
+                    "Minimum effective VSLY", "Maximum effective VSLY",
+                    "Implied composition drift over 27 years (%)")),
+    list(sheet = "C - Impact in 2050", dir = "R5",
+         csv = "R5_fixed_composition_impact_2050.csv",
+         keep = c("LMIC_group", "DALY", "VLW_billion", "factor_2050",
+                  "VLW_drift_adjusted", "Scenario", "VLW_2050_billion"),
+         header = c("Income group", "Projected DALYs in 2050",
+                    "Primary VLW (billion constant-2023 USD)",
+                    "Composition-drift factor in 2050",
+                    "Drift-adjusted VLW (billion constant-2023 USD)", "Scenario",
+                    "All-LMIC VLW in 2050 (billion constant-2023 USD, except difference)"))
+  ))
 )
+
+# Optional exact output-name filter used by the standalone per-table scripts in table/code/.
+# Keeping the filter here ensures that the all-table and one-table paths execute identical logic.
+if (exists("TABLE_FILTER", inherits = FALSE)) {
+  spec <- Filter(function(s) identical(s$out, TABLE_FILTER), spec)
+  if (!length(spec)) stop("Unknown table requested: ", TABLE_FILTER)
+}
 
 # -- Per column: if every value is numeric (thousands commas / scientific notation allowed),
 # convert to numeric, otherwise keep as text. This is what prevents the 1000x error: numeric
@@ -210,27 +298,36 @@ strip_cjk_theme <- function(path) {
   invisible(path)
 }
 
-cat("Source CSVs: ", CSV_DIR, "\nOutput     : ", OUT_DIR, "\n\n", sep = "")
-n_num <- 0L
-for (s in spec) {
-  f <- file.path(CSV_DIR, s$csv)
+read_table_sheet <- function(s) {
+  src_dir <- if (is.null(s$dir)) CSV_DIR else file.path(CODE_DIR, "outputs", s$dir)
+  f <- file.path(src_dir, s$csv)
   if (!file.exists(f)) stop("Missing source CSV: ", f)
-  # Read everything as character to bypass readr type guessing, then decide column by column
   d <- read_csv(f, col_types = cols(.default = col_character()), progress = FALSE)
-
   missing <- setdiff(s$keep, names(d))
   if (length(missing)) stop(s$csv, " is missing columns: ", paste(missing, collapse = ", "))
   d <- d[, s$keep, drop = FALSE]
-
   stopifnot(length(s$header) == ncol(d))
   d[] <- lapply(d, as_col)
-  n_num <- n_num + sum(vapply(d, is.numeric, logical(1)))
   names(d) <- s$header
+  d
+}
+
+cat("Source CSVs: ", CSV_DIR, "\nOutput     : ", OUT_DIR, "\n\n", sep = "")
+n_num <- 0L
+for (s in spec) {
+  sheet_specs <- if (is.null(s$sheets)) list(c(s, list(sheet = "Sheet1"))) else s$sheets
+  sheets <- lapply(sheet_specs, read_table_sheet)
+  names(sheets) <- vapply(sheet_specs, function(x) x$sheet, character(1))
+  n_num <- n_num + sum(vapply(sheets, function(d) sum(vapply(d, is.numeric, logical(1))), integer(1)))
 
   out_path <- file.path(OUT_DIR, s$out)
-  write_xlsx(setNames(list(d), "Sheet1"), out_path, format_headers = TRUE)
+  write_xlsx(sheets, out_path, format_headers = TRUE)
   strip_cjk_theme(out_path)
 
-  cat(sprintf("  %-30s <- %-58s %3d rows x %2d cols\n", s$out, s$csv, nrow(d), ncol(d)))
+  dims <- paste(vapply(seq_along(sheets), function(i) {
+    sprintf("%s: %d x %d", names(sheets)[i], nrow(sheets[[i]]), ncol(sheets[[i]]))
+  }, character(1)), collapse = "; ")
+  sources <- paste(vapply(sheet_specs, function(x) x$csv, character(1)), collapse = " + ")
+  cat(sprintf("  %-30s <- %-58s [%s]\n", s$out, sources, dims))
 }
 cat(sprintf("\nDone: %d xlsx files; %d columns written as numeric.\n", length(spec), n_num))
