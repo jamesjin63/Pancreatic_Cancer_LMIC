@@ -1,0 +1,205 @@
+location_name,location_id,LMIC,LMIC_group
+Philippines,16,1,Lower middle income
+China,6,1,Upper middle income
+Democratic People's Republic of Korea,7,1,Low income
+United Kingdom,95,0,
+Nepal,164,1,Lower middle income
+New Zealand,72,0,
+Kiribati,23,1,Lower middle income
+Andorra,74,0,
+Argentina,97,1,Upper middle income
+Papua New Guinea,26,1,Lower middle income
+Myanmar,15,1,Lower middle income
+Mali,211,1,Low income
+Micronesia (Federated States of),25,1,Lower middle income
+Republic of Moldova,61,1,Upper middle income
+Bolivia (Plurinational State of),121,1,Lower middle income
+Ireland,84,0,
+Djibouti,177,1,Lower middle income
+Syrian Arab Republic,153,1,Low income
+Egypt,141,1,Lower middle income
+Romania,52,0,
+Lao People's Democratic Republic,12,1,Lower middle income
+Austria,75,0,
+Mexico,130,1,Upper middle income
+Norway,90,0,
+United Republic of Tanzania,189,1,Lower middle income
+Belize,108,1,Upper middle income
+Solomon Islands,28,1,Lower middle income
+Uruguay,99,0,
+Albania,43,1,Upper middle income
+Bangladesh,161,1,Lower middle income
+Brazil,135,1,Upper middle income
+Benin,200,1,Lower middle income
+Iran (Islamic Republic of),142,1,Upper middle income
+Poland,51,0,
+Ecuador,122,1,Upper middle income
+Bosnia and Herzegovina,44,1,Upper middle income
+Iraq,143,1,Upper middle income
+Nicaragua,131,1,Lower middle income
+Azerbaijan,34,1,Upper middle income
+Montenegro,50,1,Upper middle income
+Trinidad and Tobago,119,0,
+Brunei Darussalam,66,0,
+Russian Federation,62,0,
+Comoros,176,1,Lower middle income
+Ukraine,63,1,Upper middle income
+Zambia,191,1,Lower middle income
+Mongolia,38,1,Upper middle income
+Guam,351,0,
+Burkina Faso,201,1,Low income
+Tajikistan,39,1,Lower middle income
+South Sudan,435,1,Low income
+Eritrea,178,1,Low income
+Sri Lanka,17,1,Lower middle income
+Türkiye,155,1,Upper middle income
+Barbados,107,0,
+Canada,101,0,
+Suriname,118,1,Upper middle income
+Samoa,27,1,Upper middle income
+North Macedonia,49,1,Upper middle income
+Cameroon,202,1,Lower middle income
+Venezuela (Bolivarian Republic of),133,0,
+Panama,132,0,
+Dominica,110,1,Upper middle income
+Central African Republic,169,1,Low income
+Maldives,14,1,Upper middle income
+Angola,168,1,Lower middle income
+Malaysia,13,1,Upper middle income
+Mauritania,212,1,Lower middle income
+Uganda,190,1,Low income
+Ethiopia,179,0,
+Jordan,144,1,Lower middle income
+Tokelau,413,0,
+Peru,123,1,Upper middle income
+Slovakia,54,0,
+Taiwan,8,0,
+Cyprus,77,0,
+Cuba,109,1,Upper middle income
+Nigeria,214,1,Lower middle income
+Tonga,29,1,Upper middle income
+Tuvalu,416,1,Upper middle income
+Turkmenistan,40,1,Upper middle income
+Italy,86,0,
+Botswana,193,1,Upper middle income
+Grenada,112,1,Upper middle income
+United States Virgin Islands,422,0,
+Afghanistan,160,1,Low income
+Armenia,33,1,Upper middle income
+Togo,218,1,Low income
+United States of America,102,0,
+Uzbekistan,41,1,Lower middle income
+Fiji,22,1,Upper middle income
+Germany,81,0,
+Haiti,114,1,Lower middle income
+Portugal,91,0,
+Georgia,35,1,Upper middle income
+Zimbabwe,198,1,Lower middle income
+Gabon,173,1,Upper middle income
+Belarus,57,1,Upper middle income
+Mozambique,184,1,Low income
+Bhutan,162,1,Lower middle income
+Bahamas,106,0,
+Kenya,180,1,Lower middle income
+Croatia,46,0,
+Sweden,93,0,
+Burundi,175,1,Low income
+Serbia,53,1,Upper middle income
+Oman,150,0,
+Latvia,59,0,
+Democratic Republic of the Congo,171,1,Low income
+Seychelles,186,0,
+Guinea-Bissau,209,1,Low income
+Pakistan,165,1,Lower middle income
+Palau,380,0,
+Palestine,149,1,Lower middle income
+Spain,92,0,
+Nauru,369,0,
+Guinea,208,1,Lower middle income
+Chile,98,0,
+Marshall Islands,24,1,Upper middle income
+Hungary,48,0,
+Jamaica,115,1,Upper middle income
+Algeria,139,1,Upper middle income
+Congo,170,1,Lower middle income
+Costa Rica,126,0,
+Slovenia,55,0,
+Qatar,151,0,
+San Marino,396,0,
+Somalia,187,1,Low income
+Liberia,210,1,Low income
+Bahrain,140,0,
+Iceland,83,0,
+Saint Kitts and Nevis,393,0,
+Madagascar,181,1,Low income
+Saudi Arabia,152,0,
+Saint Vincent and the Grenadines,117,1,Upper middle income
+Guatemala,128,1,Upper middle income
+Belgium,76,0,
+Japan,67,0,
+Cabo Verde,203,1,Upper middle income
+Chad,204,1,Low income
+Bermuda,305,0,
+Lesotho,194,1,Lower middle income
+Paraguay,136,1,Upper middle income
+Niger,213,1,Low income
+Republic of Korea,68,0,
+Israel,85,0,
+Indonesia,11,1,Upper middle income
+Dominican Republic,111,1,Upper middle income
+Kuwait,145,0,
+Tunisia,154,1,Lower middle income
+Greenland,349,0,
+Thailand,18,1,Upper middle income
+Switzerland,94,0,
+Bulgaria,45,0,
+Luxembourg,87,0,
+Sudan,522,1,Low income
+Mauritius,183,1,Upper middle income
+American Samoa,298,0,
+Sao Tome and Principe,215,1,Lower middle income
+Malawi,182,1,Low income
+Czechia,47,0,
+United Arab Emirates,156,0,
+Equatorial Guinea,172,1,Upper middle income
+Greece,82,0,
+Australia,71,0,
+Denmark,78,0,
+Yemen,157,1,Low income
+Singapore,69,0,
+Kazakhstan,36,1,Upper middle income
+Gambia,206,1,Low income
+Netherlands,89,0,
+Colombia,125,1,Upper middle income
+Rwanda,185,1,Low income
+Saint Lucia,116,1,Upper middle income
+Monaco,367,0,
+Timor-Leste,19,1,Lower middle income
+Honduras,129,1,Lower middle income
+Lebanon,146,1,Lower middle income
+El Salvador,127,1,Upper middle income
+Viet Nam,20,1,Lower middle income
+Namibia,195,1,Lower middle income
+Libya,147,1,Upper middle income
+Estonia,58,0,
+Sierra Leone,217,1,Low income
+Malta,88,0,
+France,80,0,
+Cambodia,10,1,Lower middle income
+Vanuatu,30,1,Lower middle income
+Antigua and Barbuda,105,0,
+Eswatini,197,1,Lower middle income
+Finland,79,0,
+Senegal,216,1,Lower middle income
+India,163,1,Lower middle income
+Côte d'Ivoire,205,1,Lower middle income
+Cook Islands,320,0,
+Lithuania,60,0,
+Northern Mariana Islands,376,0,
+Guyana,113,0,
+Niue,374,0,
+Morocco,148,1,Lower middle income
+Ghana,207,1,Lower middle income
+Puerto Rico,385,0,
+South Africa,196,1,Upper middle income
+Kyrgyzstan,37,1,Lower middle income

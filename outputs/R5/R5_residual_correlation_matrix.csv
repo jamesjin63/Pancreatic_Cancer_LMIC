@@ -1,0 +1,7 @@
+Matrix,Group,Low income,Lower middle income,Upper middle income
+Raw Pearson,Low income,1,0.48206996260812973,0.7015810517986524
+Raw Pearson,Lower middle income,0.48206996260812973,1,0.6455903471929817
+Raw Pearson,Upper middle income,0.7015810517986524,0.6455903471929817,1
+After eigenvalue clipping,Low income,1,0.48206996260813045,0.7015810517986526
+After eigenvalue clipping,Lower middle income,0.48206996260813045,1,0.6455903471929818
+After eigenvalue clipping,Upper middle income,0.7015810517986525,0.6455903471929818,1

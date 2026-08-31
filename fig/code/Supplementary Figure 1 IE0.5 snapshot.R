@@ -5,7 +5,7 @@
 # Manuscript figure: Supplementary Figure 1
 # Valuation scenario: IE = 0.5
 # Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 512-546
-# Shared preamble  : _common.R (= canonical script lines 1-352)
+# Shared preamble  : _common.R (= canonical script lines 1-454)
 # Output           : fig/Supplementary Figure 1 IE0.5 snapshot.pdf
 #
 # Only two things differ from the canonical script: (1) the two-space for-loop indent is

@@ -1,0 +1,367 @@
+Country,Sex,Income Group,DALYs (point estimate),VLW (billion constant-2023 USD; point estimate),VLW undiscounted (billion constant-2023 USD),VLW/GDP (%; point estimate)
+Zimbabwe,Male,Lower middle income,3806,0.127,0.063,0.1339
+Zimbabwe,Female,Lower middle income,3578,0.119,0.058,0.1259
+Guatemala,Male,Upper middle income,4348,0.344,0.159,0.1379
+Guatemala,Female,Upper middle income,5637,0.446,0.198,0.1788
+Maldives,Male,Upper middle income,140,0.02,0.008,0.1534
+Maldives,Female,Upper middle income,115,0.016,0.007,0.1262
+Micronesia (Federated States of),Male,Lower middle income,59,0.001,0.001,0.3003
+Micronesia (Federated States of),Female,Lower middle income,21,0.001,0,0.1085
+Mexico,Male,Upper middle income,72648,10.408,4.659,0.3219
+Mexico,Female,Upper middle income,77172,11.056,4.739,0.342
+Montenegro,Male,Upper middle income,1409,0.252,0.108,1.2997
+Montenegro,Female,Upper middle income,942,0.168,0.069,0.8683
+Mali,Male,Low income,7648,0.14,0.072,0.185
+Mali,Female,Low income,4350,0.079,0.041,0.1052
+Angola,Male,Lower middle income,5655,0.317,0.167,0.0885
+Angola,Female,Lower middle income,5088,0.285,0.14,0.0796
+Benin,Male,Lower middle income,2401,0.057,0.028,0.0978
+Benin,Female,Lower middle income,1963,0.047,0.022,0.08
+Djibouti,Male,Lower middle income,330,0.014,0.006,0.1647
+Djibouti,Female,Lower middle income,237,0.01,0.005,0.118
+Congo,Male,Lower middle income,1048,0.041,0.021,0.0975
+Congo,Female,Lower middle income,1206,0.047,0.024,0.1121
+Egypt,Male,Lower middle income,77344,8.238,3.791,0.3883
+Egypt,Female,Lower middle income,47738,5.085,2.367,0.2396
+Kyrgyzstan,Male,Lower middle income,3475,0.146,0.064,0.2814
+Kyrgyzstan,Female,Lower middle income,3297,0.138,0.058,0.267
+Papua New Guinea,Male,Lower middle income,2484,0.067,0.032,0.1374
+Papua New Guinea,Female,Lower middle income,1883,0.051,0.024,0.1042
+Saint Vincent and the Grenadines,Male,Upper middle income,113,0.013,0.006,0.6416
+Saint Vincent and the Grenadines,Female,Upper middle income,80,0.009,0.004,0.4535
+Republic of Moldova,Male,Upper middle income,7596,0.775,0.343,1.7768
+Republic of Moldova,Female,Upper middle income,4304,0.439,0.18,1.0069
+Dominica,Male,Upper middle income,94,0.011,0.005,0.8133
+Dominica,Female,Upper middle income,60,0.007,0.003,0.5182
+Bolivia (Plurinational State of),Male,Lower middle income,10365,0.768,0.353,0.4867
+Bolivia (Plurinational State of),Female,Lower middle income,7657,0.568,0.252,0.3596
+Burundi,Male,Low income,1953,0.013,0.007,0.082
+Burundi,Female,Low income,1425,0.009,0.005,0.0599
+Malaysia,Male,Upper middle income,21411,4.489,1.896,0.3505
+Malaysia,Female,Upper middle income,15843,3.322,1.369,0.2593
+Tajikistan,Male,Lower middle income,1550,0.044,0.02,0.0858
+Tajikistan,Female,Lower middle income,1807,0.052,0.023,0.1
+China,Male,Upper middle income,1781009,257.833,105.49,0.7259
+China,Female,Upper middle income,984617,142.541,56.01,0.4013
+Solomon Islands,Male,Lower middle income,408,0.006,0.003,0.2935
+Solomon Islands,Female,Lower middle income,187,0.003,0.001,0.1346
+Belize,Male,Upper middle income,193,0.015,0.007,0.2698
+Belize,Female,Upper middle income,251,0.02,0.008,0.3508
+Uzbekistan,Male,Lower middle income,11525,0.736,0.331,0.1859
+Uzbekistan,Female,Lower middle income,8717,0.557,0.24,0.1406
+United Republic of Tanzania,Male,Lower middle income,6119,0.141,0.066,0.0545
+United Republic of Tanzania,Female,Lower middle income,3988,0.092,0.043,0.0355
+Nepal,Male,Lower middle income,5346,0.166,0.074,0.1035
+Nepal,Female,Lower middle income,3581,0.111,0.049,0.0693
+Myanmar,Male,Lower middle income,27763,0.95,0.484,0.2949
+Myanmar,Female,Lower middle income,25606,0.876,0.406,0.272
+Grenada,Male,Upper middle income,154,0.017,0.007,0.7547
+Grenada,Female,Upper middle income,111,0.012,0.005,0.5454
+Sri Lanka,Male,Lower middle income,11547,0.96,0.411,0.3013
+Sri Lanka,Female,Lower middle income,9443,0.785,0.32,0.2464
+Türkiye,Male,Upper middle income,128386,31.886,13.741,0.8651
+Türkiye,Female,Upper middle income,74574,18.521,7.893,0.5025
+Suriname,Male,Upper middle income,553,0.067,0.031,0.5052
+Suriname,Female,Upper middle income,440,0.053,0.023,0.4021
+Mauritania,Male,Lower middle income,1195,0.048,0.022,0.1368
+Mauritania,Female,Lower middle income,1144,0.046,0.022,0.1309
+Madagascar,Male,Low income,5837,0.061,0.031,0.1076
+Madagascar,Female,Low income,5596,0.058,0.029,0.1031
+Jordan,Male,Lower middle income,8813,0.528,0.219,0.4429
+Jordan,Female,Lower middle income,4733,0.283,0.118,0.2379
+Vanuatu,Male,Lower middle income,91,0.002,0.001,0.1631
+Vanuatu,Female,Lower middle income,48,0.001,0,0.086
+Albania,Male,Upper middle income,3406,0.473,0.196,0.8113
+Albania,Female,Upper middle income,1878,0.26,0.104,0.4472
+Ukraine,Male,Upper middle income,81215,8.249,3.944,1.3243
+Ukraine,Female,Upper middle income,50708,5.15,2.172,0.8269
+Zambia,Male,Lower middle income,1853,0.043,0.023,0.0514
+Zambia,Female,Lower middle income,1694,0.04,0.021,0.047
+Serbia,Male,Upper middle income,20857,3.448,1.484,1.8106
+Serbia,Female,Upper middle income,17373,2.872,1.192,1.5082
+Argentina,Male,Upper middle income,69158,12.017,5.13,0.8732
+Argentina,Female,Upper middle income,67190,11.675,4.799,0.8483
+Honduras,Male,Lower middle income,2338,0.096,0.042,0.1263
+Honduras,Female,Lower middle income,3548,0.146,0.063,0.1917
+Ecuador,Male,Upper middle income,8571,0.784,0.342,0.2741
+Ecuador,Female,Upper middle income,8717,0.798,0.33,0.2787
+Cabo Verde,Male,Upper middle income,356,0.021,0.009,0.3922
+Cabo Verde,Female,Upper middle income,556,0.033,0.014,0.612
+Lesotho,Male,Lower middle income,543,0.009,0.005,0.1351
+Lesotho,Female,Lower middle income,515,0.009,0.005,0.1282
+Iran (Islamic Republic of),Male,Upper middle income,50585,5.502,2.319,0.321
+Iran (Islamic Republic of),Female,Upper middle income,28710,3.123,1.311,0.1822
+Dominican Republic,Male,Upper middle income,9103,1.352,0.62,0.4619
+Dominican Republic,Female,Upper middle income,7016,1.042,0.452,0.356
+Nicaragua,Male,Lower middle income,2464,0.118,0.052,0.2076
+Nicaragua,Female,Lower middle income,2801,0.134,0.057,0.236
+Nigeria,Male,Lower middle income,14472,0.724,0.367,0.0365
+Nigeria,Female,Lower middle income,10770,0.539,0.271,0.0272
+Fiji,Male,Upper middle income,565,0.048,0.023,0.3512
+Fiji,Female,Upper middle income,306,0.026,0.012,0.1903
+Timor-Leste,Male,Lower middle income,293,0.008,0.004,0.1215
+Timor-Leste,Female,Lower middle income,337,0.009,0.004,0.1398
+Lebanon,Male,Lower middle income,7092,0.513,0.218,0.7063
+Lebanon,Female,Lower middle income,4495,0.325,0.136,0.4476
+Liberia,Male,Low income,1343,0.014,0.007,0.1406
+Liberia,Female,Low income,951,0.01,0.005,0.0996
+Morocco,Male,Lower middle income,11882,0.676,0.293,0.1784
+Morocco,Female,Lower middle income,9423,0.536,0.243,0.1415
+Somalia,Male,Low income,1128,0.01,0.005,0.0353
+Somalia,Female,Low income,1031,0.009,0.005,0.0323
+Armenia,Male,Upper middle income,4937,0.611,0.257,0.9575
+Armenia,Female,Upper middle income,3670,0.454,0.182,0.7118
+Côte d'Ivoire,Male,Lower middle income,7434,0.309,0.157,0.1371
+Côte d'Ivoire,Female,Lower middle income,7521,0.313,0.156,0.1388
+Senegal,Male,Lower middle income,2962,0.081,0.038,0.0942
+Senegal,Female,Lower middle income,2579,0.071,0.033,0.082
+Brazil,Male,Upper middle income,203346,24.757,10.967,0.5537
+Brazil,Female,Upper middle income,192173,23.397,9.911,0.5233
+Marshall Islands,Male,Upper middle income,28,0.001,0.001,0.4148
+Marshall Islands,Female,Upper middle income,21,0.001,0,0.307
+Belarus,Male,Upper middle income,19417,3.442,1.569,1.2164
+Belarus,Female,Upper middle income,12628,2.239,0.926,0.791
+Tuvalu,Male,Upper middle income,10,0,0,0.5775
+Tuvalu,Female,Upper middle income,5,0,0,0.2744
+Uganda,Male,Low income,10649,0.19,0.095,0.1258
+Uganda,Female,Low income,9654,0.172,0.082,0.1141
+Burkina Faso,Male,Low income,2538,0.04,0.02,0.0634
+Burkina Faso,Female,Low income,2420,0.038,0.018,0.0604
+Cambodia,Male,Lower middle income,4399,0.188,0.084,0.1452
+Cambodia,Female,Lower middle income,4745,0.203,0.088,0.1566
+South Africa,Male,Upper middle income,42591,3.722,1.893,0.3874
+South Africa,Female,Upper middle income,35589,3.11,1.49,0.3237
+Algeria,Male,Upper middle income,12983,1.256,0.538,0.1617
+Algeria,Female,Upper middle income,7733,0.748,0.32,0.0963
+Azerbaijan,Male,Upper middle income,8605,1.17,0.531,0.4872
+Azerbaijan,Female,Upper middle income,4992,0.679,0.295,0.2827
+Kenya,Male,Lower middle income,11303,0.411,0.191,0.1174
+Kenya,Female,Lower middle income,13694,0.497,0.227,0.1423
+Ghana,Male,Lower middle income,9574,0.416,0.208,0.1629
+Ghana,Female,Lower middle income,7773,0.338,0.163,0.1323
+Bosnia and Herzegovina,Male,Upper middle income,6957,0.901,0.386,1.2559
+Bosnia and Herzegovina,Female,Upper middle income,5805,0.751,0.309,1.0479
+Togo,Male,Low income,1509,0.027,0.014,0.0932
+Togo,Female,Low income,1479,0.027,0.013,0.0914
+Afghanistan,Male,Low income,2541,0.032,0.016,0.0352
+Afghanistan,Female,Low income,2222,0.028,0.014,0.0308
+Central African Republic,Male,Low income,489,0.004,0.002,0.0546
+Central African Republic,Female,Low income,766,0.006,0.003,0.0855
+Georgia,Male,Upper middle income,6011,0.866,0.394,0.9302
+Georgia,Female,Upper middle income,3605,0.52,0.215,0.5579
+Indonesia,Male,Upper middle income,168536,14.938,6.709,0.3446
+Indonesia,Female,Upper middle income,115182,10.209,4.413,0.2355
+Malawi,Male,Low income,1455,0.015,0.008,0.0396
+Malawi,Female,Low income,1279,0.013,0.007,0.0349
+Jamaica,Male,Upper middle income,2095,0.152,0.067,0.4241
+Jamaica,Female,Upper middle income,1678,0.122,0.051,0.3398
+Guinea-Bissau,Male,Low income,243,0.004,0.002,0.065
+Guinea-Bissau,Female,Low income,289,0.005,0.003,0.0771
+Kiribati,Male,Lower middle income,8,0,0,0.0341
+Kiribati,Female,Lower middle income,13,0,0,0.0576
+Kazakhstan,Male,Upper middle income,16971,3.758,1.687,0.4799
+Kazakhstan,Female,Upper middle income,10707,2.371,0.988,0.3028
+Sudan,Male,Low income,12210,0.17,0.08,0.1403
+Sudan,Female,Low income,8108,0.113,0.053,0.0932
+India,Male,Lower middle income,359274,21.325,9.737,0.1436
+India,Female,Lower middle income,232511,13.801,6.315,0.093
+Democratic Republic of the Congo,Male,Low income,13013,0.129,0.069,0.0707
+Democratic Republic of the Congo,Female,Low income,18880,0.188,0.1,0.1026
+Lao People's Democratic Republic,Male,Lower middle income,2755,0.147,0.07,0.2066
+Lao People's Democratic Republic,Female,Lower middle income,2960,0.158,0.075,0.222
+Mozambique,Male,Low income,651,0.006,0.003,0.0111
+Mozambique,Female,Low income,510,0.005,0.002,0.0087
+Bangladesh,Male,Lower middle income,53484,2.813,1.262,0.1793
+Bangladesh,Female,Lower middle income,32980,1.735,0.802,0.1106
+Sierra Leone,Male,Low income,1678,0.033,0.018,0.114
+Sierra Leone,Female,Low income,1098,0.021,0.012,0.0746
+Samoa,Male,Upper middle income,93,0.004,0.002,0.248
+Samoa,Female,Upper middle income,53,0.003,0.001,0.1417
+North Macedonia,Male,Upper middle income,3765,0.531,0.226,1.1843
+North Macedonia,Female,Upper middle income,2558,0.361,0.149,0.8047
+Mongolia,Male,Upper middle income,3908,0.405,0.188,0.6455
+Mongolia,Female,Upper middle income,2453,0.254,0.106,0.4051
+Pakistan,Male,Lower middle income,42739,1.478,0.682,0.0993
+Pakistan,Female,Lower middle income,52084,1.801,0.856,0.121
+Philippines,Male,Lower middle income,43226,2.73,1.242,0.2163
+Philippines,Female,Lower middle income,37529,2.37,1.015,0.1878
+Comoros,Male,Lower middle income,88,0.002,0.001,0.0594
+Comoros,Female,Lower middle income,78,0.002,0.001,0.053
+Tonga,Male,Upper middle income,82,0.004,0.002,0.449
+Tonga,Female,Upper middle income,45,0.002,0.001,0.2454
+Gabon,Male,Upper middle income,604,0.072,0.035,0.1397
+Gabon,Female,Upper middle income,771,0.092,0.045,0.1784
+Palestine,Male,Lower middle income,2447,0.084,0.044,0.2724
+Palestine,Female,Lower middle income,1476,0.051,0.023,0.1643
+Thailand,Male,Upper middle income,87430,11.823,5.1,0.7011
+Thailand,Female,Upper middle income,52056,7.039,2.806,0.4174
+Tunisia,Male,Lower middle income,13110,1.058,0.463,0.6178
+Tunisia,Female,Lower middle income,7254,0.586,0.251,0.3419
+Turkmenistan,Male,Upper middle income,2105,0.24,0.111,0.1644
+Turkmenistan,Female,Upper middle income,1505,0.172,0.075,0.1175
+Iraq,Male,Upper middle income,35233,2.968,1.398,0.4494
+Iraq,Female,Upper middle income,22705,1.913,0.862,0.2896
+Cameroon,Male,Lower middle income,7269,0.226,0.117,0.1473
+Cameroon,Female,Lower middle income,6301,0.196,0.102,0.1277
+Bhutan,Male,Lower middle income,178,0.017,0.007,0.1301
+Bhutan,Female,Lower middle income,154,0.014,0.007,0.1129
+Niger,Male,Low income,4942,0.053,0.029,0.1086
+Niger,Female,Low income,1249,0.013,0.007,0.0275
+Viet Nam,Male,Lower middle income,60395,5.22,2.275,0.346
+Viet Nam,Female,Lower middle income,37088,3.206,1.289,0.2125
+Peru,Male,Upper middle income,23509,2.299,0.978,0.3994
+Peru,Female,Upper middle income,27479,2.688,1.127,0.4668
+Paraguay,Male,Upper middle income,4595,0.464,0.213,0.386
+Paraguay,Female,Upper middle income,4420,0.446,0.195,0.3713
+Chad,Male,Low income,2165,0.034,0.019,0.0644
+Chad,Female,Low income,1570,0.024,0.013,0.0467
+Sao Tome and Principe,Male,Lower middle income,20,0.001,0,0.0507
+Sao Tome and Principe,Female,Lower middle income,17,0.001,0,0.043
+Haiti,Male,Lower middle income,4742,0.09,0.048,0.2343
+Haiti,Female,Lower middle income,4533,0.086,0.046,0.224
+Guinea,Male,Lower middle income,957,0.024,0.012,0.0382
+Guinea,Female,Lower middle income,850,0.021,0.011,0.0339
+Mauritius,Male,Upper middle income,1463,0.249,0.112,0.6735
+Mauritius,Female,Upper middle income,945,0.161,0.068,0.4351
+Botswana,Male,Upper middle income,767,0.093,0.044,0.1777
+Botswana,Female,Upper middle income,516,0.062,0.028,0.1195
+Libya,Male,Upper middle income,6133,0.488,0.224,0.4827
+Libya,Female,Upper middle income,3719,0.296,0.141,0.2927
+Equatorial Guinea,Male,Upper middle income,469,0.047,0.025,0.1458
+Equatorial Guinea,Female,Upper middle income,516,0.052,0.027,0.1606
+Gambia,Male,Low income,204,0.004,0.002,0.0434
+Gambia,Female,Low income,188,0.004,0.002,0.04
+Eswatini,Male,Lower middle income,281,0.018,0.01,0.1311
+Eswatini,Female,Lower middle income,283,0.018,0.01,0.1321
+Namibia,Male,Lower middle income,416,0.027,0.014,0.0807
+Namibia,Female,Lower middle income,249,0.016,0.008,0.0484
+Colombia,Male,Upper middle income,31070,3.741,1.571,0.3414
+Colombia,Female,Upper middle income,32522,3.916,1.577,0.3574
+Saint Lucia,Male,Upper middle income,181,0.027,0.012,0.5805
+Saint Lucia,Female,Upper middle income,174,0.026,0.011,0.5576
+El Salvador,Male,Upper middle income,4176,0.304,0.142,0.3806
+El Salvador,Female,Upper middle income,5563,0.406,0.174,0.5069
+Rwanda,Male,Low income,4207,0.082,0.042,0.1733
+Rwanda,Female,Low income,3359,0.066,0.032,0.1384
+China,Both,Upper middle income,2765626,400.374,161.5,1.1272
+Cambodia,Both,Lower middle income,9144,0.391,0.171,0.3017
+Indonesia,Both,Upper middle income,283718,25.147,11.122,0.5801
+Lao People's Democratic Republic,Both,Lower middle income,5715,0.305,0.145,0.4287
+Malaysia,Both,Upper middle income,37254,7.811,3.265,0.6098
+Maldives,Both,Upper middle income,256,0.036,0.015,0.2796
+Myanmar,Both,Lower middle income,53369,1.827,0.89,0.5668
+Philippines,Both,Lower middle income,80755,5.101,2.257,0.4041
+Sri Lanka,Both,Lower middle income,20990,1.745,0.731,0.5476
+Thailand,Both,Upper middle income,139485,18.862,7.906,1.1185
+Timor-Leste,Both,Lower middle income,629,0.017,0.008,0.2613
+Viet Nam,Both,Lower middle income,97483,8.426,3.565,0.5585
+Fiji,Both,Upper middle income,870,0.073,0.035,0.5415
+Kiribati,Both,Lower middle income,21,0,0,0.0917
+Marshall Islands,Both,Upper middle income,49,0.002,0.001,0.7218
+Micronesia (Federated States of),Both,Lower middle income,80,0.002,0.001,0.4088
+Papua New Guinea,Both,Lower middle income,4367,0.117,0.056,0.2416
+Samoa,Both,Upper middle income,147,0.007,0.003,0.3897
+Solomon Islands,Both,Lower middle income,596,0.009,0.004,0.4281
+Tonga,Both,Upper middle income,126,0.006,0.003,0.6944
+Vanuatu,Both,Lower middle income,139,0.003,0.001,0.2491
+Armenia,Both,Upper middle income,8606,1.066,0.439,1.6693
+Azerbaijan,Both,Upper middle income,13596,1.849,0.826,0.7699
+Georgia,Both,Upper middle income,9616,1.386,0.61,1.4881
+Kazakhstan,Both,Upper middle income,27678,6.129,2.675,0.7827
+Kyrgyzstan,Both,Lower middle income,6771,0.284,0.122,0.5484
+Mongolia,Both,Upper middle income,6361,0.658,0.294,1.0506
+Tajikistan,Both,Lower middle income,3357,0.096,0.043,0.1858
+Turkmenistan,Both,Upper middle income,3611,0.412,0.186,0.2819
+Uzbekistan,Both,Lower middle income,20241,1.293,0.571,0.3264
+Albania,Both,Upper middle income,5284,0.733,0.3,1.2585
+Bosnia and Herzegovina,Both,Upper middle income,12762,1.652,0.694,2.3038
+North Macedonia,Both,Upper middle income,6323,0.892,0.375,1.989
+Montenegro,Both,Upper middle income,2351,0.42,0.177,2.168
+Serbia,Both,Upper middle income,38231,6.319,2.676,3.3188
+Belarus,Both,Upper middle income,32045,5.681,2.496,2.0074
+Republic of Moldova,Both,Upper middle income,11900,1.214,0.524,2.7838
+Ukraine,Both,Upper middle income,131923,13.399,6.116,2.1512
+Argentina,Both,Upper middle income,136348,23.692,9.929,1.7215
+Belize,Both,Upper middle income,444,0.035,0.015,0.6205
+Dominica,Both,Upper middle income,154,0.018,0.008,1.3315
+Dominican Republic,Both,Upper middle income,16119,2.395,1.072,0.8179
+Grenada,Both,Upper middle income,265,0.029,0.013,1.3002
+Haiti,Both,Lower middle income,9275,0.176,0.094,0.4582
+Jamaica,Both,Upper middle income,3773,0.274,0.118,0.7639
+Saint Lucia,Both,Upper middle income,355,0.053,0.023,1.1381
+Saint Vincent and the Grenadines,Both,Upper middle income,193,0.022,0.01,1.0951
+Suriname,Both,Upper middle income,992,0.12,0.054,0.9073
+Bolivia (Plurinational State of),Both,Lower middle income,18023,1.336,0.605,0.8463
+Ecuador,Both,Upper middle income,17288,1.582,0.673,0.5528
+Peru,Both,Upper middle income,50989,4.987,2.105,0.8662
+Colombia,Both,Upper middle income,63591,7.658,3.148,0.6988
+El Salvador,Both,Upper middle income,9740,0.71,0.316,0.8875
+Guatemala,Both,Upper middle income,9985,0.789,0.357,0.3167
+Honduras,Both,Lower middle income,5886,0.243,0.105,0.3179
+Mexico,Both,Upper middle income,149820,21.464,9.398,0.6639
+Nicaragua,Both,Lower middle income,5265,0.252,0.108,0.4437
+Brazil,Both,Upper middle income,395519,48.154,20.879,1.077
+Paraguay,Both,Upper middle income,9015,0.91,0.408,0.7573
+Algeria,Both,Upper middle income,20716,2.004,0.857,0.258
+Egypt,Both,Lower middle income,125082,13.322,6.158,0.6279
+Iran (Islamic Republic of),Both,Upper middle income,79295,8.624,3.629,0.5032
+Iraq,Both,Upper middle income,57939,4.881,2.261,0.7391
+Jordan,Both,Lower middle income,13545,0.811,0.337,0.6808
+Lebanon,Both,Lower middle income,11587,0.838,0.354,1.1539
+Libya,Both,Upper middle income,9852,0.784,0.365,0.7753
+Morocco,Both,Lower middle income,21304,1.212,0.536,0.3199
+Palestine,Both,Lower middle income,3924,0.134,0.068,0.4367
+Tunisia,Both,Lower middle income,20364,1.644,0.714,0.9597
+Türkiye,Both,Upper middle income,202960,50.407,21.634,1.3676
+Afghanistan,Both,Low income,4763,0.06,0.03,0.0661
+Bangladesh,Both,Lower middle income,86463,4.548,2.063,0.2899
+Bhutan,Both,Lower middle income,332,0.031,0.014,0.2429
+India,Both,Lower middle income,591785,35.125,16.051,0.2366
+Nepal,Both,Lower middle income,8928,0.277,0.123,0.1729
+Pakistan,Both,Lower middle income,94823,3.279,1.537,0.2203
+Angola,Both,Lower middle income,10743,0.602,0.307,0.1681
+Central African Republic,Both,Low income,1256,0.009,0.005,0.1401
+Congo,Both,Lower middle income,2254,0.089,0.045,0.2096
+Democratic Republic of the Congo,Both,Low income,31893,0.317,0.169,0.1733
+Equatorial Guinea,Both,Upper middle income,985,0.099,0.052,0.3064
+Gabon,Both,Upper middle income,1375,0.164,0.08,0.318
+Burundi,Both,Low income,3378,0.022,0.012,0.1419
+Comoros,Both,Lower middle income,166,0.004,0.002,0.1124
+Djibouti,Both,Lower middle income,567,0.024,0.011,0.2827
+Kenya,Both,Lower middle income,24996,0.908,0.418,0.2597
+Madagascar,Both,Low income,11433,0.119,0.06,0.2107
+Malawi,Both,Low income,2735,0.029,0.015,0.0745
+Mauritius,Both,Upper middle income,2408,0.409,0.18,1.1086
+Mozambique,Both,Low income,1161,0.011,0.006,0.0199
+Rwanda,Both,Low income,7566,0.148,0.074,0.3117
+Somalia,Both,Low income,2159,0.019,0.01,0.0676
+United Republic of Tanzania,Both,Lower middle income,10107,0.234,0.109,0.09
+Uganda,Both,Low income,20303,0.362,0.178,0.2399
+Zambia,Both,Lower middle income,3547,0.083,0.044,0.0984
+Botswana,Both,Upper middle income,1282,0.155,0.073,0.2972
+Lesotho,Both,Lower middle income,1058,0.018,0.01,0.2633
+Namibia,Both,Lower middle income,665,0.043,0.021,0.1291
+South Africa,Both,Upper middle income,78180,6.832,3.383,0.7111
+Eswatini,Both,Lower middle income,563,0.037,0.02,0.2632
+Zimbabwe,Both,Lower middle income,7384,0.246,0.121,0.2598
+Benin,Both,Lower middle income,4365,0.104,0.051,0.1778
+Burkina Faso,Both,Low income,4959,0.079,0.038,0.1238
+Cameroon,Both,Lower middle income,13570,0.422,0.219,0.275
+Cabo Verde,Both,Upper middle income,912,0.054,0.023,1.0042
+Chad,Both,Low income,3735,0.058,0.032,0.1111
+Côte d'Ivoire,Both,Lower middle income,14955,0.622,0.313,0.2759
+Gambia,Both,Low income,391,0.007,0.004,0.0834
+Ghana,Both,Lower middle income,17347,0.754,0.371,0.2952
+Guinea,Both,Lower middle income,1807,0.045,0.023,0.0721
+Guinea-Bissau,Both,Low income,532,0.009,0.005,0.1421
+Liberia,Both,Low income,2295,0.024,0.013,0.2402
+Mali,Both,Low income,11999,0.219,0.112,0.2902
+Mauritania,Both,Lower middle income,2338,0.094,0.044,0.2677
+Niger,Both,Low income,6191,0.067,0.036,0.1361
+Nigeria,Both,Lower middle income,25242,1.263,0.638,0.0637
+Sao Tome and Principe,Both,Lower middle income,38,0.001,0.001,0.0938
+Senegal,Both,Lower middle income,5541,0.152,0.07,0.1762
+Sierra Leone,Both,Low income,2776,0.054,0.03,0.1886
+Togo,Both,Low income,2987,0.054,0.027,0.1846
+Tuvalu,Both,Upper middle income,15,0.001,0,0.8518
+Sudan,Both,Low income,20318,0.283,0.133,0.2334

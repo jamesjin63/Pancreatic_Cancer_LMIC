@@ -1,10 +1,13 @@
 # ==============================================================================
 # _common.R - shared preamble for every figure script
 #
-# Contents = scripts/run_LMIC_Pancreatic_VLW_v2.R lines 1-352, extracted verbatim:
+# Contents = scripts/run_LMIC_Pancreatic_VLW_v2.R lines 1-455, extracted verbatim:
 #   paths, reference constants, palettes/themes, helper functions, data loading (section 1),
 #   VLW computation (section 2), and the forecast helper functions.
-# Nothing is modified except the directory resolution below.
+# Nothing is modified except the directory resolution and the environment pin below.
+#
+# GENERATED FILE - do not edit by hand. Regenerate with:
+#   Rscript scripts/rebuild_fig_common.R
 #
 # Sourced by the figure scripts; not run on its own.
 # ==============================================================================
@@ -14,8 +17,9 @@ CODE_DIR <- normalizePath(file.path(FIG_CODE_DIR, "..", ".."))   # fig/code -> f
 FIG_DIR  <- normalizePath(file.path(FIG_CODE_DIR, ".."))          # fig/
 dir.create(FIG_DIR, showWarnings=FALSE, recursive=TRUE)
 setwd(CODE_DIR)   # the canonical script reads data_raw/ relative to code/
+source(file.path(CODE_DIR, "scripts", "_env.R"))   # pin ggplot2/scales; see that file
 
-# ------------- verbatim from run_LMIC_Pancreatic_VLW_v2.R:1-352 below -------------
+# ------------- verbatim from run_LMIC_Pancreatic_VLW_v2.R:1-455 below -------------
 ################################################################################
 # LMIC Pancreatic Cancer — Value of Lost Welfare (VLW) Analysis — R3 CANONICAL WORKFLOW
 # GBD 2023 · 1990-2023 · Forecast to 2050 · IE = 0.5, 1.0, 1.5
@@ -30,7 +34,8 @@ setwd(CODE_DIR)   # the canonical script reads data_raw/ relative to code/
 #      residual correlation; subgroup interval endpoints are never summed.
 #   5. Non-seasonal ARIMA is the primary model and damped-trend ETS is the
 #      sensitivity model. Selected by a prespecified rule (lowest pooled
-#      rolling-origin MAPE subject to Ljung-Box residual adequacy); see
+#      rolling-origin MAPE among candidates for which the Ljung-Box test does not detect
+#      residual autocorrelation at the 5% level); see
 #      scripts/run_R5_reviewer_analyses.R.
 #   6. The rate panel is the unweighted mean of country-specific ASRs.
 #
@@ -272,33 +277,78 @@ fh <- 2050 - 2023
 forecast_level <- 95
 simulation_n <- 50000L
 
-fit_series <- function(series, model=c("ETS","ARIMA"), h=fh, label="") {
-  model <- match.arg(model)
+# Reviewer #3 Major 1: the candidate set is the full set of evaluated methods. All four
+#   models -- ETS, ARIMA, Naive and Drift -- are fitted, diagnosed and selected by one rule
+#   applied uniformly. No method is excluded a posteriori on the basis of its observed
+#   performance. MODEL_SET is therefore the single place where the candidate set is declared.
+MODEL_SET <- c("ETS","ARIMA","Naive","Drift")
+
+# Reviewer #3 Minor 2: ARIMA coefficients and AICc are now extracted. Previously AICc was
+#   hard-coded to NA for ARIMA and fit$coef was never read, so the fitted-model supplementary
+#   table did not contain the parameter estimates and information criteria its caption claimed.
+fit_series <- function(series, model=MODEL_SET, h=fh, label="") {
+  model <- match.arg(model, MODEL_SET)
   y <- ts(series, start=1990, frequency=1)
-  fit <- if (model=="ETS") {
-    ets(y, model="AAN", damped=TRUE)
-  } else {
-    auto.arima(y, seasonal=FALSE, stepwise=FALSE, approximation=FALSE)
-  }
-  # R3 Comment 2: level=95 is explicit; column 1 is therefore the 95% interval.
-  fc <- forecast(fit, h=h, level=forecast_level)
-  fitdf <- if (model=="ETS") length(fit$par) else
-    sum(arimaorder(fit)[c("p","q","P","Q")], na.rm=TRUE)
+  fit <- switch(model,
+    "ETS"   = ets(y, model="AAN", damped=TRUE),
+    "ARIMA" = auto.arima(y, seasonal=FALSE, stepwise=FALSE, approximation=FALSE),
+    "Naive" = rwf(y, h=h, drift=FALSE, level=forecast_level),
+    "Drift" = rwf(y, h=h, drift=TRUE,  level=forecast_level))
+  # R3 Comment 2: level=95 is explicit; column 1 is therefore the 95% simulation interval.
+  # Major 1: that nominal level is a construction parameter, not a validated coverage claim.
+  fc <- if (model %in% c("Naive","Drift")) fit else forecast(fit, h=h, level=forecast_level)
+  # Estimated parameters entering the Ljung-Box degrees-of-freedom correction:
+  #   ETS   - all smoothing and damping parameters returned by ets()
+  #   ARIMA - the non-seasonal AR and MA orders (d costs no degree of freedom)
+  #   Naive - none; Drift - the single drift term
+  fitdf <- switch(model,
+    "ETS"   = length(fit$par),
+    "ARIMA" = sum(arimaorder(fit)[c("p","q","P","Q")], na.rm=TRUE),
+    "Naive" = 0L,
+    "Drift" = 1L)
   lag_use <- max(fitdf+3L, min(10L, floor(length(series)/5)))
   lag_use <- min(lag_use, length(series)-1L)
-  lb <- Box.test(residuals(fit), lag=lag_use, type="Ljung-Box", fitdf=fitdf)
+  res <- as.numeric(residuals(fit))
+  lb <- Box.test(res[!is.na(res)], lag=lag_use, type="Ljung-Box", fitdf=fitdf)
   p <- if (model=="ETS") fit$par else numeric()
   gv <- function(nm) if (nm %in% names(p)) unname(p[nm]) else NA_real_
-  method <- if (model=="ETS") fit$method else
-    paste0("ARIMA(",paste(arimaorder(fit)[c("p","d","q")],collapse=","),")")
+  method <- switch(model,
+    "ETS"   = fit$method,
+    "ARIMA" = paste0("ARIMA(",paste(arimaorder(fit)[c("p","d","q")],collapse=","),")"),
+    "Naive" = "Random walk (naive)",
+    "Drift" = "Random walk with drift")
+  # Information criteria and in-sample RMSE. rwf() objects carry no likelihood, so the criteria
+  # are undefined for the two benchmarks and are reported as NA rather than as a spurious value.
+  has_lik <- model %in% c("ETS","ARIMA")
+  sig2 <- switch(model,
+    "ETS" = fit$sigma2, "ARIMA" = fit$sigma2,
+    stats::var(res[!is.na(res)]))
   diag <- tibble(series=label, model=model, method=method,
     alpha=gv("alpha"), beta=gv("beta"), phi=gv("phi"),
-    sigma2=ifelse(model=="ETS",fit$sigma2,fit$sigma2),
-    AIC=AIC(fit), AICc=ifelse(model=="ETS",fit$aicc,NA_real_), BIC=BIC(fit),
+    sigma2=sig2,
+    AIC  = if (has_lik) AIC(fit)     else NA_real_,
+    AICc = if (has_lik) fit$aicc     else NA_real_,   # Minor 2: was NA for ARIMA
+    BIC  = if (has_lik) BIC(fit)     else NA_real_,
     RMSE=unname(accuracy(fit)[1,"RMSE"]), Ljung_Box_lag=lag_use,
     Ljung_Box_fitdf=fitdf, Ljung_Box_p=as.numeric(lb$p.value),
+    # Minor 3: the Ljung-Box test can only fail to reject the null of no residual
+    #   autocorrelation. The column records the test outcome, never "adequacy" as an
+    #   established property. Wording downstream must follow the same convention.
+    residual_autocorrelation_detected=ifelse(lb$p.value<0.05,"Yes","No"),
     residual_autocorrelation_signal=ifelse(lb$p.value<0.05,"Yes","No"))
-  list(fit=fit, fc=fc, diag=diag, residuals=as.numeric(residuals(fit)))
+  list(fit=fit, fc=fc, diag=diag, residuals=res,
+       coefficients=arima_coef_table(fit, model, label))
+}
+
+# Minor 2: ARIMA coefficient estimates with standard errors, as a long table.
+arima_coef_table <- function(fit, model, label="") {
+  if (model != "ARIMA" || length(coef(fit)) == 0L)
+    return(tibble(series=character(), model=character(), term=character(),
+                  estimate=numeric(), std_error=numeric(), z=numeric()))
+  est <- coef(fit)
+  se  <- tryCatch(sqrt(diag(fit$var.coef)), error=function(e) rep(NA_real_, length(est)))
+  tibble(series=label, model=model, term=names(est),
+         estimate=unname(est), std_error=unname(se), z=unname(est)/unname(se))
 }
 
 calc_errors <- function(actual,pred) {
@@ -313,31 +363,73 @@ validate_series <- function(series,label,outcome) {
     z <- fit_series(train,model=model,h=length(test),label=label)
     calc_errors(test,as.numeric(z$fc$mean)) %>%
       mutate(series=label,outcome=outcome,model=model,holdout="2018-2023",
-             interval_level=forecast_level,.before=1)
+             scenario_nominal_level=forecast_level,.before=1)
   })
 }
 
-nearest_correlation <- function(x) {
+# Reviewer #3 Major 3: this is eigenvalue clipping followed by rescaling to unit diagonal,
+#   NOT Higham's nearest-correlation-matrix algorithm. The previous name implied the latter.
+#   Procedure, in order: (1) missing entries set to 0; (2) unit diagonal imposed;
+#   (3) symmetrisation as (X + X')/2; (4) eigenvalues floored at EIGEN_FLOOR; (5) cov2cor
+#   rescaling. The result is positive definite by construction. It is the nearest correlation
+#   matrix only in the spectral sense, and is not claimed to be a Frobenius-norm projection.
+EIGEN_FLOOR <- 1e-8
+pd_correlation_eigen_clip <- function(x) {
+  nm <- dimnames(x)
   x[is.na(x)] <- 0
   diag(x) <- 1
   e <- eigen((x+t(x))/2,symmetric=TRUE)
-  y <- e$vectors %*% diag(pmax(e$values,1e-8)) %*% t(e$vectors)
-  cov2cor(y)
+  y <- e$vectors %*% diag(pmax(e$values,EIGEN_FLOOR)) %*% t(e$vectors)
+  out <- cov2cor(y)
+  dimnames(out) <- nm      # eigen()/cov2cor() drop names; the groups must stay identifiable
+  out
 }
 
-joint_income_projection <- function(history,vsly_2023,model=c("ETS","ARIMA"),
+# ---------------------------------------------------------------------------------------------
+# Joint income-group simulation.
+#
+# Reviewer #3 Major 3 - the method is stated in full here, and the manuscript Methods repeats
+# it. Every element the reviewer asked for is named explicitly:
+#
+#  * Correlation matrix. Pearson correlation of the in-sample residuals of the three income-group
+#    DALY models, computed once on the full 1990-2023 fit with use="pairwise.complete.obs". It is
+#    a CROSS-SECTIONAL correlation between groups at a common time index. It carries no temporal
+#    structure and is held fixed across horizons.
+#  * Positive-definite adjustment. pd_correlation_eigen_clip(): eigenvalue clipping at
+#    EIGEN_FLOOR followed by cov2cor rescaling. See that function for the exact ordering.
+#  * Parameter treatment. Model parameters are fixed at their point estimates. Marginal standard
+#    deviations are backed out of the marginal forecast interval as (upper-lower)/(2*z_0.975), so
+#    the simulation propagates forecast-error variance ONLY. Parameter-estimation uncertainty and
+#    model uncertainty are NOT propagated.
+#  * Seeds. set.seed(seed + k) at horizon k, with seed = 20260724 for ETS and 20260725 for ARIMA.
+#    Every horizon therefore draws from an independent stream.
+#  * Non-negativity. No truncation is applied. The routine instead COUNTS draws falling at or
+#    below zero and returns that count, so the assumption can be checked rather than assumed.
+#  * Interpretation. Because each horizon is simulated independently, the draws are POINTWISE at
+#    each year. They are not coherent temporal forecast paths, and the resulting ranges must not
+#    be read as the probability of any trajectory over time.
+#
+# Reviewer #3 Major 1 - the output columns are named as scenario bounds, not as prediction
+# intervals. Empirical coverage of the nominal 95% construction was 55.1% overall and 47.2% at a
+# six-year horizon, so no calibrated probability statement is available and none is made. The
+# nominal level is retained only as a construction parameter, under the name
+# scenario_nominal_level, and is reported alongside the ranges it generated.
+# ---------------------------------------------------------------------------------------------
+joint_income_projection <- function(history,vsly_2023,model=MODEL_SET,
                                     seed=20260724L) {
-  model <- match.arg(model)
+  model <- match.arg(model, MODEL_SET)
   groups <- income_fct
   fits <- setNames(lapply(groups,function(g) {
     x <- history %>% filter(LMIC_group==g) %>% arrange(year) %>% pull(D)
     fit_series(x,model=model,label=paste("DALY",g,sep="|"))
   }),groups)
-  corr <- nearest_correlation(cor(do.call(cbind,lapply(fits,`[[`,"residuals")),
-                                  use="pairwise.complete.obs"))
+  resid_mat <- do.call(cbind,lapply(fits,`[[`,"residuals"))
+  corr_raw <- cor(resid_mat, use="pairwise.complete.obs")
+  corr <- pd_correlation_eigen_clip(corr_raw)
   years <- 2024:2050
   all_rows <- vector("list",length(years))
   group_rows <- vector("list",length(years))
+  neg_rows <- vector("list",length(years))
   for (k in seq_along(years)) {
     means <- sapply(fits,function(z) as.numeric(z$fc$mean[k]))
     lowers <- sapply(fits,function(z) as.numeric(z$fc$lower[k,1]))
@@ -350,22 +442,36 @@ joint_income_projection <- function(history,vsly_2023,model=c("ETS","ARIMA"),
     v <- vsly_2023$VSLY_effective[match(groups,vsly_2023$LMIC_group)]/1e9
     total_d <- rowSums(draws)
     total_v <- rowSums(sweep(draws,2,v,"*"))
+    # Major 3: non-negativity is measured, not imposed.
+    neg_rows[[k]] <- tibble(model=model,Year=years[k],
+      draws=simulation_n,
+      n_group_draws_nonpositive=sum(draws<=0),
+      pct_group_draws_nonpositive=sum(draws<=0)/length(draws)*100,
+      n_total_draws_nonpositive=sum(total_d<=0),
+      pct_total_draws_nonpositive=sum(total_d<=0)/length(total_d)*100)
     all_rows[[k]] <- tibble(model=model,Year=years[k],Group="All LMICs",
-      DALY=sum(means),DALY_lower_95_PI=quantile(total_d,0.025),
-      DALY_upper_95_PI=quantile(total_d,0.975),
-      VLW_billion=sum(means*v),VLW_lower_95_PI_billion=quantile(total_v,0.025),
-      VLW_upper_95_PI_billion=quantile(total_v,0.975),
-      interval_level=forecast_level,simulation_draws=simulation_n,
-      method="Joint normal simulation using explicit 95% marginal forecast intervals and empirical residual correlation")
+      DALY=sum(means),DALY_scenario_low=quantile(total_d,0.025),
+      DALY_scenario_high=quantile(total_d,0.975),
+      VLW_billion=sum(means*v),VLW_scenario_low_billion=quantile(total_v,0.025),
+      VLW_scenario_high_billion=quantile(total_v,0.975),
+      scenario_nominal_level=forecast_level,simulation_draws=simulation_n,
+      interval_interpretation="Model-dependent scenario range; nominal level is a construction parameter and is not a validated coverage claim",
+      method="Pointwise joint normal simulation across income groups at each horizon, using the marginal forecast dispersion and the fixed cross-sectional residual correlation; horizons are simulated independently and the draws are not temporal paths")
     group_rows[[k]] <- tibble(model=model,Year=years[k],Group=groups,
-      DALY=means,DALY_lower_95_PI=lowers,DALY_upper_95_PI=uppers,
-      VLW_billion=means*v,VLW_lower_95_PI_billion=lowers*v,
-      VLW_upper_95_PI_billion=uppers*v,interval_level=forecast_level,
-      simulation_draws=NA_integer_,method="Group DALY forecast monetized using the fixed 2023 group effective VSLY")
+      DALY=means,DALY_scenario_low=lowers,DALY_scenario_high=uppers,
+      VLW_billion=means*v,VLW_scenario_low_billion=lowers*v,
+      VLW_scenario_high_billion=uppers*v,scenario_nominal_level=forecast_level,
+      simulation_draws=NA_integer_,
+      interval_interpretation="Model-dependent scenario range; nominal level is a construction parameter and is not a validated coverage claim",
+      method="Group DALY forecast monetized using the fixed 2023 group effective VSLY")
   }
   list(all=bind_rows(all_rows),groups=bind_rows(group_rows),
-       diagnostics=bind_rows(lapply(fits,`[[`,"diag")),residual_correlation=corr,
+       diagnostics=bind_rows(lapply(fits,`[[`,"diag")),
+       coefficients=bind_rows(lapply(fits,`[[`,"coefficients")),
+       residual_correlation=corr, residual_correlation_raw=corr_raw,
+       eigenvalues_raw=eigen((corr_raw+t(corr_raw))/2,symmetric=TRUE)$values,
+       nonnegativity=bind_rows(neg_rows),
+       seed=seed, draws=simulation_n,
        fits=fits)
 }
 
-# ---------------------------- end of shared preamble ----------------------------

@@ -1,11 +1,11 @@
-# Shared runner for Supplementary Tables 1-14.
+# Shared runner for Supplementary Tables 1-19.
 # Each numbered wrapper sets TABLE_NUMBER and sources this file. The actual workbook specification
 # and writing logic remain in scripts/make_submission_xlsx.R, so individual and batch builds cannot
 # drift apart.
 
 if (!exists("TABLE_NUMBER", inherits = FALSE) ||
-    length(TABLE_NUMBER) != 1L || TABLE_NUMBER < 1L || TABLE_NUMBER > 14L) {
-  stop("A wrapper must set TABLE_NUMBER to an integer from 1 through 14.")
+    length(TABLE_NUMBER) != 1L || TABLE_NUMBER < 1L || TABLE_NUMBER > 19L) {
+  stop("A wrapper must set TABLE_NUMBER to an integer from 1 through 19.")
 }
 
 .wrapper_dir <- function() {

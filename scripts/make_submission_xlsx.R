@@ -49,6 +49,7 @@ CODE_DIR <- if (exists("CODE_DIR_OVERRIDE", inherits = FALSE)) {
 } else {
   normalizePath(file.path(.self(), ".."))
 }
+source(file.path(CODE_DIR, "scripts", "_env.R"))   # rel_path(); see that file
 CSV_DIR  <- file.path(CODE_DIR, "outputs", "R3_submission_tables")
 args     <- commandArgs(trailingOnly = TRUE)
 OUT_DIR  <- if (exists("OUT_DIR_OVERRIDE", inherits = FALSE)) {
@@ -96,10 +97,10 @@ spec <- list(
                   "Share of total VLW (%)")),
 
   list(out = "Table 5.xlsx", csv = "Main Table 5_selected projections.csv",
-       keep = c("Model", "Year", "Group", "VLW (billion constant-2023 USD; 95% PI)",
-                "DALYs (thousands; 95% PI)"),
-       header = c("Model", "Year", "Group", "VLW (billion constant-2023 USD; 95% PI)",
-                  "DALYs (thousands; 95% PI)")),
+       keep = c("Model", "Year", "Group", "VLW (billion constant-2023 USD; scenario range)",
+                "DALYs (thousands; scenario range)"),
+       header = c("Model", "Year", "Group", "VLW (billion constant-2023 USD; scenario range)",
+                  "DALYs (thousands; scenario range)")),
 
   list(out = "Table 6.xlsx", csv = "Main Table 6_income-elasticity sensitivity.csv",
        keep = c("Income Elasticity", "VLW base 3% (billion constant-2023 USD; point estimate)",
@@ -107,7 +108,30 @@ spec <- list(
        header = c("Income Elasticity", "VLW base 3% (billion constant-2023 USD)",
                   "VLW undiscounted (billion constant-2023 USD)", "VLW/GDP (%)")),
 
-  # -- Supplementary tables: R4 renumbering --
+  # ============================================================================================
+  # Supplementary tables S1-S19.
+  #
+  # NUMBERING. S1-S13 are the numbers used in the R5 manuscript, in the order its caption list
+  # gives them. Earlier rounds numbered these files by the order in which the pipeline happened
+  # to produce them, which since the R5 round no longer matched the manuscript: manuscript S4 was
+  # file S13, manuscript S8-S10 were three panels of file S10 plus file S11, and manuscript S11
+  # was file S12. Reviewer #3 hit exactly that mismatch when checking whether Supplementary
+  # Table 11 contained the ARIMA coefficients its caption promises. The files are now named for
+  # the manuscript, so the caption, the file name, the per-table script and the response letter
+  # all agree, and the manuscript needs no renumbering.
+  #
+  # S14-S19 are new at this round and are appended after the existing numbering, so no existing
+  # citation in the manuscript has to move. Only six new captions have to be added.
+  #
+  # Two files from earlier rounds are deliberately NOT part of the submission set:
+  #   - the single 2018-2023 holdout validation, superseded by the rolling-origin validation
+  #     that now occupies S8-S10 and no longer cited in the manuscript;
+  #   - the two-model forecast/residual diagnostics from the main pipeline, superseded by the
+  #     four-model table that is now S11.
+  # Their CSVs are still written to outputs/R3_submission_tables/ for continuity.
+  # ============================================================================================
+
+  # S1 - manuscript: "Country-level ranking of pancreatic cancer welfare burden in LMICs in 2023."
   list(out = "Supplementary Table 1.xlsx", csv = "Supplementary Table 1_country burden.csv",
        keep = c("Rank", "Country", "Income Group", "GDP pc (PPP)",
                 "DALYs (thousands; point estimate)",
@@ -117,7 +141,8 @@ spec <- list(
                   "GDP per capita (PPP, 2023 international $)", "DALYs (thousands)",
                   "VLW (billion constant-2023 USD)", "VLW/GDP (%)")),
 
-  list(out = "Supplementary Table 2.xlsx",                       # <- R3 Supplementary Table 8
+  # S2 - manuscript: "Unweighted country-level regression analysis ... HC3 standard errors."
+  list(out = "Supplementary Table 2.xlsx",
        csv = "Supplementary Table 8_income-gradient regression HC3.csv",
        keep = c("term", "estimate", "HC3_standard_error", "lower_95_CI", "upper_95_CI",
                 "t_statistic", "df", "p_value_two_sided", "n", "R_squared",
@@ -125,7 +150,8 @@ spec <- list(
        header = c("Term", "Estimate", "HC3 standard error", "Lower 95% CI", "Upper 95% CI",
                   "t statistic", "df", "Two-sided p value", "n", "R2", "Adjusted R2")),
 
-  list(out = "Supplementary Table 3.xlsx",                       # <- R3 Supplementary Table 2
+  # S3 - manuscript: "Country- and sex-specific welfare burden of pancreatic cancer in 2023."
+  list(out = "Supplementary Table 3.xlsx",
        csv = "Supplementary Table 2_country and sex burden.csv",
        keep = c("Country", "Sex", "Income Group", "DALYs (point estimate)",
                 "VLW (billion constant-2023 USD; point estimate)",
@@ -135,99 +161,47 @@ spec <- list(
                   "VLW (billion constant-2023 USD)",
                   "VLW undiscounted (billion constant-2023 USD)", "VLW/GDP (%)")),
 
-  list(out = "Supplementary Table 4.xlsx",                       # <- R3 Supplementary Table 3
-       csv = "Supplementary Table 3_annual ETS and ARIMA projections.csv",
-       keep = c("model", "Year", "Group", "DALY", "DALY_lower_95_PI", "DALY_upper_95_PI",
-                "VLW_billion", "VLW_lower_95_PI_billion", "VLW_upper_95_PI_billion"),
-       header = c("model", "Year", "Group", "DALYs", "DALYs lower 95% PI",
-                  "DALYs upper 95% PI", "VLW (billion constant-2023 USD)",
-                  "VLW lower 95% PI (billion constant-2023 USD)",
-                  "VLW upper 95% PI (billion constant-2023 USD)")),
-
-  list(out = "Supplementary Table 5.xlsx",                       # <- R3 Supplementary Table 4
-       csv = "Supplementary Table 4_holdout validation.csv",
-       keep = c("series", "outcome", "model", "holdout", "MAE", "RMSE", "MAPE"),
-       header = c("Series", "Outcome", "Model", "Holdout period", "MAE", "RMSE", "MAPE")),
-
-  list(out = "Supplementary Table 6.xlsx",                       # <- R3 Supplementary Table 5
-       csv = "Supplementary Table 5_forecast and residual diagnostics.csv",
-       keep = c("series", "outcome", "model", "method", "alpha", "beta", "phi", "sigma2",
-                "AIC", "AICc", "BIC", "RMSE", "Ljung_Box_lag", "Ljung_Box_fitdf",
-                "Ljung_Box_p", "residual_autocorrelation_signal"),
-       header = c("Series", "Outcome", "Model", "Method", "alpha", "beta", "phi",
-                  "Error variance (σ2)", "AIC", "AICc", "BIC", "RMSE",
-                  "Ljung-Box lag", "Ljung-Box degrees of freedom", "Ljung-Box p value",
-                  "Residual autocorrelation signal")),
-
-  list(out = "Supplementary Table 7.xlsx",                       # <- R3 Supplementary Table 6
-       csv = "Supplementary Table 6_projection reconciliation.csv",
-       keep = c("model", "Year", "Group", "derived_VLW_billion", "direct_VLW_billion",
-                "difference_billion", "percent_difference"),
-       header = c("model", "Year", "Group",
-                  "VLW derived from DALY projections (billion constant-2023 USD)",
-                  "Independently projected VLW (billion constant-2023 USD)",
-                  "Absolute difference (billion constant-2023 USD)",
-                  "Relative difference (%)")),
-
-  list(out = "Supplementary Table 8.xlsx",                       # <- R3 Supplementary Table 7
-       csv = "Supplementary Table 7_excluded-country DALY burden.csv",
-       keep = c("location_name", "LMIC_group", "DALY", "income_group_total_DALYs",
-                "percent_of_income_group_DALYs", "all_128_LMIC_DALYs",
-                "percent_of_all_128_LMIC_DALYs"),
-       header = c("Country", "Income group", "DALYs", "Total DALYs in income group",
-                  "Percentage of income-group DALYs (%)",
-                  "Total DALYs among all 128 LMICs",
-                  "Percentage of total DALYs among all 128 LMICs (%)")),
-
-  list(out = "Supplementary Table 9.xlsx",
-       csv = "Supplementary Table 9_unweighted country ASR means.csv",
-       keep = c("LMIC_group", "year", "R"),
-       header = c("Income group", "Year",
-                  "Mean country-specific age-standardized DALY rate (per 100,000 population)")),
-
-  # -- Added at R5 (Reviewer #3, comment 2): rolling-origin validation over multiple origins,
-  # with the naive and drift benchmarks, MASE, and empirical 95% PI coverage. Source lives in
-  # outputs/R5/ because it is produced by scripts/run_R5_reviewer_analyses.R.
-  list(out = "Supplementary Table 10.xlsx", dir = "R5",
-       csv = "R5_rolling_origin_supplementary_table.csv",
-       keep = c("Panel", "Model", "Role", "Stratum", "Origins", "Forecasts",
-                "MAPE", "MASE", "Coverage of the 95% PI"),
-       header = c("Panel", "Model", "Model role", "Stratum", "Rolling origins",
-                  "Forecast-actual pairs", "MAPE (%)", "MASE",
-                  "Empirical coverage of the 95% prediction interval (%)")),
-
-  list(out = "Supplementary Table 11.xlsx", dir = "R5",
-       csv = "R5_rolling_origin_by_series.csv",
-       keep = c("series", "outcome", "model", "n_origins", "n_obs", "MAE", "RMSE",
-                "MAPE", "MASE", "coverage_95"),
-       header = c("Series", "Outcome", "Model", "Rolling origins", "Forecast-actual pairs",
-                  "MAE", "RMSE", "MAPE (%)", "MASE",
-                  "Empirical coverage of the 95% prediction interval (%)")),
-
-  list(out = "Supplementary Table 12.xlsx", dir = "R5",
-       csv = "R5_full_sample_residual_adequacy.csv",
-       keep = c("series", "outcome", "model", "method", "alpha", "beta", "phi", "sigma2",
-                "AIC", "AICc", "BIC", "RMSE", "Ljung_Box_lag", "Ljung_Box_fitdf",
-                "Ljung_Box_p", "residual_autocorrelation_signal"),
-       header = c("Series", "Outcome", "Model", "Method", "alpha", "beta", "phi",
-                  "Error variance (sigma2)", "AIC", "AICc", "BIC", "RMSE",
-                  "Ljung-Box lag", "Ljung-Box degrees of freedom", "Ljung-Box p value",
-                  "Residual autocorrelation signal")),
-
-  list(out = "Supplementary Table 13.xlsx", sheets = list(
+  # S4 - manuscript: "Secondary sex-specific VLW projections and reconciliation with the primary
+  #      DALY-derived projection through 2050."  (was file S13)
+  list(out = "Supplementary Table 4.xlsx", sheets = list(
     list(sheet = "A - Sex-specific 2050", dir = "R5", csv = "R5_sex_specific_2050.csv",
-         keep = c("Sex", "Year", "Estimand", "VLW_billion", "VLW_lower_95_PI",
-                  "VLW_upper_95_PI", "Ljung_Box_p", "residual_autocorrelation_signal"),
+         keep = c("Sex", "Year", "Estimand", "VLW_billion", "VLW_scenario_low",
+                  "VLW_scenario_high", "Ljung_Box_p", "residual_autocorrelation_detected"),
          header = c("Sex", "Year", "Estimand", "VLW (billion constant-2023 USD)",
-                    "VLW lower 95% PI (billion constant-2023 USD)",
-                    "VLW upper 95% PI (billion constant-2023 USD)", "Ljung-Box p value",
-                    "Residual autocorrelation signal")),
+                    "VLW scenario range, low (billion constant-2023 USD)",
+                    "VLW scenario range, high (billion constant-2023 USD)", "Ljung-Box p value",
+                    "Residual autocorrelation detected at the 5% level")),
     list(sheet = "B - Reconciliation", dir = "R5", csv = "R5_sex_reconciliation_2050.csv",
          keep = c("Quantity", "Value_billion"),
          header = c("Quantity", "Value (billion constant-2023 USD, except relative difference)"))
   )),
 
-  list(out = "Supplementary Table 14.xlsx", sheets = list(
+  # S5 - manuscript: "Reconciliation between DALY-derived and independently projected
+  #      welfare-loss estimates, 2024-2050."  (was file S7)
+  list(out = "Supplementary Table 5.xlsx",
+       csv = "Supplementary Table 6_projection reconciliation.csv",
+       keep = c("model", "Year", "Group", "derived_VLW_billion", "direct_VLW_billion",
+                "difference_billion", "percent_difference"),
+       header = c("Model", "Year", "Group",
+                  "VLW derived from DALY projections (billion constant-2023 USD)",
+                  "Independently projected VLW (billion constant-2023 USD)",
+                  "Absolute difference (billion constant-2023 USD)",
+                  "Relative difference (%)")),
+
+  # S6 - manuscript: "Annual primary ARIMA-based conditional projections and ETS sensitivity
+  #      projections ... 2024-2050."  (was file S4)
+  list(out = "Supplementary Table 6.xlsx",
+       csv = "Supplementary Table 3_annual ETS and ARIMA projections.csv",
+       keep = c("model", "Year", "Group", "DALY", "DALY_scenario_low", "DALY_scenario_high",
+                "VLW_billion", "VLW_scenario_low_billion", "VLW_scenario_high_billion"),
+       header = c("Model", "Year", "Group", "DALYs", "DALYs scenario range, low",
+                  "DALYs scenario range, high", "VLW (billion constant-2023 USD)",
+                  "VLW scenario range, low (billion constant-2023 USD)",
+                  "VLW scenario range, high (billion constant-2023 USD)")),
+
+  # S7 - manuscript: "Historical variation in effective group VSLY multipliers and sensitivity of
+  #      projected 2050 welfare losses to composition drift."  (was file S14)
+  list(out = "Supplementary Table 7.xlsx", sheets = list(
     list(sheet = "A - Effective VSLY", dir = "R5", csv = "R5_effective_group_VSLY_by_year.csv",
          keep = c("LMIC_group", "year", "Vbar"),
          header = c("Income group", "Year",
@@ -237,7 +211,8 @@ spec <- list(
          keep = c("LMIC_group", "Vbar_1990", "Vbar_2023", "change_1990_2023_pct",
                   "annualised_drift_pct", "min", "max", "implied_27yr_drift_pct"),
          header = c("Income group", "Effective VSLY in 1990", "Effective VSLY in 2023",
-                    "Change, 1990-2023 (%)", "Annualised composition drift (%)",
+                    "Change, 1990-2023 (%)",
+                    "Annualised composition drift, endpoint CAGR (%)",
                     "Minimum effective VSLY", "Maximum effective VSLY",
                     "Implied composition drift over 27 years (%)")),
     list(sheet = "C - Impact in 2050", dir = "R5",
@@ -249,7 +224,186 @@ spec <- list(
                     "Composition-drift factor in 2050",
                     "Drift-adjusted VLW (billion constant-2023 USD)", "Scenario",
                     "All-LMIC VLW in 2050 (billion constant-2023 USD, except difference)"))
-  ))
+  )),
+
+  # S8 - manuscript: "Overall expanding-window rolling-origin validation performance."
+  #      All four evaluated methods are candidates (Reviewer #3, Major 1).
+  list(out = "Supplementary Table 8.xlsx", dir = "R5",
+       csv = "R5_rolling_origin_model_ranking.csv",
+       keep = c("model", "Role", "n_obs", "MAPE", "MASE", "MAE_rel_naive", "coverage_95",
+                "n_series_lowest_MAPE_of_4"),
+       header = c("Model", "Model role", "Forecast-actual pairs", "MAPE (%)", "MASE",
+                  "Mean ratio of absolute error to the naive benchmark",
+                  "Empirical coverage of the nominal 95% range (%)",
+                  "Series with the lowest MAPE among the four candidates")),
+
+  # S9 - manuscript: "Forecast-horizon-specific expanding-window rolling-origin validation."
+  list(out = "Supplementary Table 9.xlsx", dir = "R5",
+       csv = "R5_rolling_origin_by_horizon.csv",
+       keep = c("model", "h", "n_origins", "n_obs", "MAE", "RMSE", "MAPE", "MASE",
+                "coverage_95"),
+       header = c("Model", "Forecast horizon (years)", "Rolling origins",
+                  "Forecast-actual pairs", "MAE", "RMSE", "MAPE (%)", "MASE",
+                  "Empirical coverage of the nominal 95% range (%)")),
+
+  # S10 - manuscript: "Series-specific expanding-window rolling-origin validation."
+  list(out = "Supplementary Table 10.xlsx", dir = "R5",
+       csv = "R5_rolling_origin_by_series.csv",
+       keep = c("series", "outcome", "model", "n_origins", "n_obs", "MAE", "RMSE",
+                "MAPE", "MASE", "coverage_95"),
+       header = c("Series", "Outcome", "Model", "Rolling origins", "Forecast-actual pairs",
+                  "MAE", "RMSE", "MAPE (%)", "MASE",
+                  "Empirical coverage of the nominal 95% range (%)")),
+
+  # S11 - manuscript: "Fitted-model specifications, parameter estimates, information criteria,
+  #      in-sample RMSE, and Ljung-Box residual diagnostics."
+  #      Sheet B supplies the ARIMA coefficients the caption promises and sheet A now carries a
+  #      populated AICc for ARIMA; both were missing at the R5 round (Reviewer #3, Minor 2).
+  #      The diagnostic column records what the test observed, never "adequacy" (Minor 3).
+  list(out = "Supplementary Table 11.xlsx", sheets = list(
+    list(sheet = "A - Fitted models", dir = "R5",
+         csv = "R5_full_sample_residual_adequacy.csv",
+         keep = c("series", "outcome", "model", "method", "alpha", "beta", "phi", "sigma2",
+                  "AIC", "AICc", "BIC", "RMSE", "Ljung_Box_lag", "Ljung_Box_fitdf",
+                  "Ljung_Box_p", "residual_autocorrelation_detected"),
+         header = c("Series", "Outcome", "Model", "Method", "alpha", "beta", "phi",
+                    "Error variance (sigma2)", "AIC", "AICc", "BIC", "RMSE",
+                    "Ljung-Box lag", "Ljung-Box degrees of freedom", "Ljung-Box p value",
+                    "Residual autocorrelation detected at the 5% level")),
+    list(sheet = "B - ARIMA coefficients", dir = "R5", csv = "R5_arima_coefficients.csv",
+         keep = c("series", "outcome", "model", "term", "estimate", "std_error", "z"),
+         header = c("Series", "Outcome", "Model", "Term", "Estimate", "Standard error",
+                    "Estimate / standard error"))
+  )),
+
+  # S12 - manuscript: "Eligible, included, and excluded LMICs and excluded DALY burden."
+  list(out = "Supplementary Table 12.xlsx",
+       csv = "Supplementary Table 7_excluded-country DALY burden.csv",
+       keep = c("location_name", "LMIC_group", "DALY", "income_group_total_DALYs",
+                "percent_of_income_group_DALYs", "all_128_LMIC_DALYs",
+                "percent_of_all_128_LMIC_DALYs"),
+       header = c("Country", "Income group", "DALYs", "Total DALYs in income group",
+                  "Percentage of income-group DALYs (%)", "Total DALYs among all 128 LMICs",
+                  "Percentage of total DALYs among all 128 LMICs (%)")),
+
+  # S13 - manuscript: "Annual unweighted arithmetic means of country-specific age-standardized
+  #      pancreatic cancer DALY rates by World Bank income group, 1990-2023."
+  list(out = "Supplementary Table 13.xlsx",
+       csv = "Supplementary Table 9_unweighted country ASR means.csv",
+       keep = c("LMIC_group", "year", "R"),
+       header = c("Income group", "Year",
+                  "Mean country-specific age-standardized DALY rate (per 100,000 population)")),
+
+  # ============================================================================================
+  # S14-S19: new at this round. Appended, so nothing already cited has to be renumbered.
+  # ============================================================================================
+
+  # S14 - the prespecified rule applied with every evaluated method eligible, on the primary
+  #       DALY series. This is what lets a reader verify that nothing was excluded after the
+  #       fact and that drift and naive fail on the residual criterion (Major 1a, 1b).
+  list(out = "Supplementary Table 14.xlsx", dir = "R5",
+       csv = "R5_model_selection_primary_DALY.csv",
+       keep = c("Series", "Outcome", "Model", "Role", "Ljung_Box_p",
+                "Residual_autocorrelation_detected", "Eligible_under_rule",
+                "MAPE", "MASE", "coverage_95", "Rank_by_MAPE", "Selected"),
+       header = c("Primary DALY series", "Outcome", "Model", "Model role", "Ljung-Box p value",
+                  "Residual autocorrelation detected at the 5% level",
+                  "Eligible under the prespecified rule", "MAPE (%)", "MASE",
+                  "Empirical coverage of the nominal 95% range (%)",
+                  "Rank by MAPE among all four candidates", "Selected")),
+
+  # S15 - rolling-origin evaluation of the COMPLETE aggregate interval construction (Major 1).
+  list(out = "Supplementary Table 15.xlsx", sheets = list(
+    list(sheet = "A - Pooled", dir = "R5",
+         csv = "R5_aggregate_interval_coverage_overall.csv",
+         keep = c("model", "n_origins", "n_obs", "DALY_MAPE", "DALY_coverage",
+                  "VLW_MAPE", "VLW_coverage", "mean_relative_width_pct",
+                  "total_nonpositive_group_draws"),
+         header = c("Model", "Rolling origins", "Forecast-actual pairs",
+                    "Aggregate DALY MAPE (%)",
+                    "Empirical coverage of the aggregate DALY range (%)",
+                    "Aggregate VLW MAPE (%)",
+                    "Empirical coverage of the aggregate VLW range (%)",
+                    "Mean range width as a percentage of the point estimate",
+                    "Non-positive simulation draws")),
+    list(sheet = "B - By horizon", dir = "R5",
+         csv = "R5_aggregate_interval_coverage_by_horizon.csv",
+         keep = c("model", "h", "n_origins", "n_obs", "DALY_MAPE", "DALY_coverage",
+                  "VLW_MAPE", "VLW_coverage", "mean_relative_width_pct"),
+         header = c("Model", "Forecast horizon (years)", "Rolling origins",
+                    "Forecast-actual pairs", "Aggregate DALY MAPE (%)",
+                    "Empirical coverage of the aggregate DALY range (%)",
+                    "Aggregate VLW MAPE (%)",
+                    "Empirical coverage of the aggregate VLW range (%)",
+                    "Mean range width as a percentage of the point estimate"))
+  )),
+
+  # S16 - full disclosure of the joint simulation (Major 3).
+  list(out = "Supplementary Table 16.xlsx", sheets = list(
+    list(sheet = "A - Specification", dir = "R5",
+         csv = "R5_joint_simulation_specification.csv",
+         keep = c("Element", "Specification"), header = c("Element", "Specification")),
+    list(sheet = "B - Residual correlation", dir = "R5",
+         csv = "R5_residual_correlation_matrix.csv",
+         keep = c("Matrix", "Group", "Low income", "Lower middle income",
+                  "Upper middle income"),
+         header = c("Matrix", "Income group", "Low income", "Lower middle income",
+                    "Upper middle income")),
+    list(sheet = "C - Eigenvalues", dir = "R5", csv = "R5_correlation_eigenvalues.csv",
+         keep = c("component", "eigenvalue_raw", "eigenvalue_after_clip",
+                  "clip_was_binding"),
+         header = c("Component", "Eigenvalue before adjustment",
+                    "Eigenvalue after clipping", "Clip was binding")),
+    list(sheet = "D - Non-negativity", dir = "R5", csv = "R5_simulation_nonnegativity.csv",
+         keep = c("model", "Year", "draws", "n_group_draws_nonpositive",
+                  "pct_group_draws_nonpositive", "n_total_draws_nonpositive",
+                  "pct_total_draws_nonpositive"),
+         header = c("Model", "Year", "Draws per horizon",
+                    "Non-positive group draws", "Non-positive group draws (%)",
+                    "Non-positive aggregate draws", "Non-positive aggregate draws (%)"))
+  )),
+
+  # S17 - the composition-drift rate is an endpoint CAGR; sheet B bounds that choice (Major 3).
+  list(out = "Supplementary Table 17.xlsx", sheets = list(
+    list(sheet = "A - Drift basis", dir = "R5",
+         csv = "R5_composition_drift_basis_comparison.csv",
+         keep = c("LMIC_group", "Vbar_1990", "Vbar_2023", "endpoint_cagr_pct",
+                  "loglinear_cagr_pct", "loglinear_r2", "absolute_difference_pp"),
+         header = c("Income group", "Effective VSLY in 1990", "Effective VSLY in 2023",
+                    "Endpoint CAGR (%/year, published basis)",
+                    "Log-linear OLS CAGR (%/year, bounding check)",
+                    "Log-linear R squared", "Difference (percentage points per year)")),
+    list(sheet = "B - Impact in 2050", dir = "R5",
+         csv = "R5_composition_drift_impact_comparison.csv",
+         keep = c("Basis", "VLW_2050_fixed_composition", "VLW_2050_drift_adjusted",
+                  "difference_pct"),
+         header = c("Basis", "Fixed-composition VLW in 2050 (billion constant-2023 USD)",
+                    "Drift-adjusted VLW in 2050 (billion constant-2023 USD)",
+                    "Difference (%)"))
+  )),
+
+  # S18 - data provenance manifest (Minor 1). Sheet A is the source-level query manifest; sheet B
+  #       is the file-level manifest with checksums.
+  list(out = "Supplementary Table 18.xlsx", sheets = list(
+    list(sheet = "A - Query manifest", dir = "R5", csv = "R5_query_manifest.csv",
+         keep = c("Source", "Dataset", "Access_tool_or_portal",
+                  "Query_parameters", "Indicator_or_cause_codes", "Classification_vintage",
+                  "Downloaded_files", "Licence_and_redistribution"),
+         header = c("Source", "Dataset", "Access tool or portal",
+                    "Query parameters", "Indicator or cause codes", "Classification vintage",
+                    "Downloaded files", "Licence and redistribution")),
+    list(sheet = "B - File manifest", dir = "R5",
+         csv = "R5_data_provenance_manifest.csv",
+         keep = c("file", "bytes", "modified_utc", "md5", "rows", "columns"),
+         header = c("Input file (relative to data_raw/)", "Size (bytes)",
+                    "File timestamp, UTC (NOT the query date)", "MD5 checksum",
+                    "Rows", "Columns"))
+  )),
+
+  # S19 - the MASE definition, so the manuscript and the deposited code state the same thing
+  #       (Major 2).
+  list(out = "Supplementary Table 19.xlsx", dir = "R5", csv = "R5_MASE_definition.csv",
+       keep = c("Item", "Definition"), header = c("Item", "Definition"))
 )
 
 # Optional exact output-name filter used by the standalone per-table scripts in table/code/.
@@ -312,7 +466,8 @@ read_table_sheet <- function(s) {
   d
 }
 
-cat("Source CSVs: ", CSV_DIR, "\nOutput     : ", OUT_DIR, "\n\n", sep = "")
+cat("Source CSVs: ", rel_path(CSV_DIR), "\nOutput     : ", rel_path(OUT_DIR),
+    "\n\n", sep = "")
 n_num <- 0L
 for (s in spec) {
   sheet_specs <- if (is.null(s$sheets)) list(c(s, list(sheet = "Sheet1"))) else s$sheets
