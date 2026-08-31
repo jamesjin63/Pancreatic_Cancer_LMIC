@@ -1,0 +1,10 @@
+Item,Definition
+Statistic,"Mean absolute scaled error (MASE), non-seasonal form"
+Numerator,|y_{t+h} - yhat_{t+h}| for each forecast-actual pair
+Denominator,"mean|y_t - y_{t-1}| over the training window, a one-step naive scale"
+Denominator window,"t = 2..n, where n is the length of the training window ending at the forecast origin"
+Recomputation,"The denominator is recomputed at every origin, so the scale never uses data after the origin"
+Pooling,"Unweighted mean of scaled errors over origins, horizons and series (552 pairs per model)"
+Horizon behaviour,"The denominator is a one-step quantity while the numerator spans h = 1..6, so MASE rises with h by construction; compare only within a fixed horizon"
+Reference,"Hyndman and Koehler (2006), International Journal of Forecasting 22(4):679-688"
+Computed in,"scripts/run_R5_reviewer_analyses.R, section 1, object mase_scale"

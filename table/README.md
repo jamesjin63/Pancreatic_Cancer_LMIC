@@ -1,4 +1,4 @@
-# Supplementary Tables 1-14
+# Supplementary Tables 1-19
 
 This directory contains the 14 supplementary-table workbooks under their manuscript names and one
 standalone R entry point per table in `code/`. All wrappers reuse
@@ -39,3 +39,19 @@ annual effective group VSLY, composition-drift sensitivity, and its estimated im
 | 12 | `R5_full_sample_residual_adequacy.csv` |
 | 13 | `R5_sex_specific_2050.csv`; `R5_sex_reconciliation_2050.csv` |
 | 14 | `R5_effective_group_VSLY_by_year.csv`; `R5_fixed_composition_sensitivity.csv`; `R5_fixed_composition_impact_2050.csv` |
+
+## Added for Reviewer #3's Major and Minor points
+
+| Table | Contents | Source |
+|---|---|---|
+| S12 (sheet B) | ARIMA coefficient estimates and standard errors | `outputs/R5/R5_arima_coefficients.csv` |
+| S15 | The prespecified selection rule applied to the primary DALY series, with all four methods eligible | `outputs/R5/R5_model_selection_primary_DALY.csv` |
+| S16 | Rolling-origin coverage of the complete aggregate interval construction, pooled and by horizon | `outputs/R5/R5_aggregate_interval_coverage_*.csv` |
+| S17 | Joint-simulation specification, residual correlation matrix, its eigenvalues, and measured non-negativity | four CSVs in `outputs/R5/` |
+| S18 | Composition-drift basis: endpoint CAGR versus a log-linear fit on all observations | `outputs/R5/R5_composition_drift_*.csv` |
+| S19 | Input manifest with MD5 checksums, and the MASE definition | `outputs/R5/R5_data_provenance_manifest.csv`, `R5_MASE_definition.csv` |
+
+**Numbering note.** These files are named under the *code* numbering, which since the R5 round has
+differed from the numbering used in the manuscript (manuscript S4 is code S13, manuscript S8-S10
+are the three panels of code S10 and code S11, and so on). Reconciling the two is a separate task;
+until it is done, check the caption against the contents rather than trusting the number.

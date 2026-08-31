@@ -1,0 +1,15 @@
+Element,Specification
+Estimand,Income-group DALYs; VLW obtained by monetising DALY draws
+Group models,Three income-group series fitted independently with ARIMA
+Coupling,Draws summed across the three income groups at each horizon
+Correlation type,Cross-sectional Pearson correlation of in-sample model residuals between groups
+Correlation estimation,"Estimated once on the full 1990-2023 fit, use='pairwise.complete.obs'; held fixed across horizons"
+Positive-definite adjustment,"Eigenvalue clipping at 1e-08 after symmetrisation, then cov2cor rescaling; not Higham's algorithm"
+Parameter treatment,Fixed at point estimates; parameter-estimation and model uncertainty are NOT propagated
+Marginal dispersion,Backed out of the marginal forecast interval as (upper - lower) / (2 * z_0.975)
+Draws per horizon,"50,000"
+Seed rule,set.seed(20260725 + k) at horizon k; independent stream per horizon
+Non-negativity,No truncation applied; the number of non-positive draws is counted and reported
+Temporal structure,Horizons simulated independently; draws are pointwise per year and are NOT temporal paths
+Interval interpretation,Model-dependent scenario range; the nominal 95% level is a construction parameter only
+Valuation,Fixed 2023 group-specific effective VSLY

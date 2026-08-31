@@ -1,0 +1,61 @@
+Panel,Model,Role,Stratum,Origins,Forecasts,MAPE,MASE,Empirical coverage of the nominal 95% range (%)
+"A. Pooled across the eight series, by forecast horizon",ARIMA,Candidate,h = 1 year ahead,14,112,1.43,0.716,58.9
+"A. Pooled across the eight series, by forecast horizon",ARIMA,Candidate,h = 2 years ahead,13,104,3.20,1.709,58.7
+"A. Pooled across the eight series, by forecast horizon",ARIMA,Candidate,h = 3 years ahead,12,96,4.27,2.378,55.2
+"A. Pooled across the eight series, by forecast horizon",ARIMA,Candidate,h = 4 years ahead,11,88,5.11,2.899,53.4
+"A. Pooled across the eight series, by forecast horizon",ARIMA,Candidate,h = 5 years ahead,10,80,5.68,3.306,53.8
+"A. Pooled across the eight series, by forecast horizon",ARIMA,Candidate,h = 6 years ahead,9,72,6.96,4.189,47.2
+"A. Pooled across the eight series, by forecast horizon",ETS,Candidate,h = 1 year ahead,14,112,1.68,0.859,64.3
+"A. Pooled across the eight series, by forecast horizon",ETS,Candidate,h = 2 years ahead,13,104,3.13,1.682,58.7
+"A. Pooled across the eight series, by forecast horizon",ETS,Candidate,h = 3 years ahead,12,96,5.04,2.805,51.0
+"A. Pooled across the eight series, by forecast horizon",ETS,Candidate,h = 4 years ahead,11,88,6.28,3.568,48.9
+"A. Pooled across the eight series, by forecast horizon",ETS,Candidate,h = 5 years ahead,10,80,7.04,4.077,56.2
+"A. Pooled across the eight series, by forecast horizon",ETS,Candidate,h = 6 years ahead,9,72,8.34,4.983,50.0
+"A. Pooled across the eight series, by forecast horizon",Drift,Candidate,h = 1 year ahead,14,112,2.54,1.250,45.5
+"A. Pooled across the eight series, by forecast horizon",Drift,Candidate,h = 2 years ahead,13,104,4.79,2.475,37.5
+"A. Pooled across the eight series, by forecast horizon",Drift,Candidate,h = 3 years ahead,12,96,6.84,3.678,26.0
+"A. Pooled across the eight series, by forecast horizon",Drift,Candidate,h = 4 years ahead,11,88,8.50,4.714,20.5
+"A. Pooled across the eight series, by forecast horizon",Drift,Candidate,h = 5 years ahead,10,80,10.33,5.946,10.0
+"A. Pooled across the eight series, by forecast horizon",Drift,Candidate,h = 6 years ahead,9,72,12.35,7.441,5.6
+"A. Pooled across the eight series, by forecast horizon",Naive,Candidate,h = 1 year ahead,14,112,4.19,2.028,53.6
+"A. Pooled across the eight series, by forecast horizon",Naive,Candidate,h = 2 years ahead,13,104,8.23,4.188,30.8
+"A. Pooled across the eight series, by forecast horizon",Naive,Candidate,h = 3 years ahead,12,96,12.10,6.426,20.8
+"A. Pooled across the eight series, by forecast horizon",Naive,Candidate,h = 4 years ahead,11,88,15.56,8.548,12.5
+"A. Pooled across the eight series, by forecast horizon",Naive,Candidate,h = 5 years ahead,10,80,19.04,10.854,3.8
+"A. Pooled across the eight series, by forecast horizon",Naive,Candidate,h = 6 years ahead,9,72,22.50,13.391,0.0
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Female - VLW,14,69,4.15,2.514,43.5
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Female - VLW,14,69,4.65,2.803,52.2
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Female - VLW,14,69,4.02,2.451,39.1
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Female - VLW,14,69,9.15,5.488,36.2
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Low income - DALY,14,69,4.24,2.566,69.6
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Low income - DALY,14,69,4.93,2.982,60.9
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Low income - DALY,14,69,11.87,7.017,4.3
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Low income - DALY,14,69,17.28,10.182,4.3
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Low income - VLW,14,69,4.17,2.453,78.3
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Low income - VLW,14,69,5.68,3.333,50.7
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Low income - VLW,14,69,11.53,6.615,5.8
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Low income - VLW,14,69,17.06,9.745,4.3
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Lower middle income - DALY,14,69,4.19,2.048,66.7
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Lower middle income - DALY,14,69,4.49,2.214,60.9
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Lower middle income - DALY,14,69,8.63,4.262,15.9
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Lower middle income - DALY,14,69,15.42,7.508,14.5
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Lower middle income - VLW,14,69,3.98,1.894,69.6
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Lower middle income - VLW,14,69,4.53,2.175,59.4
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Lower middle income - VLW,14,69,8.29,3.965,17.4
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Lower middle income - VLW,14,69,15.32,7.211,14.5
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Male - VLW,14,69,4.45,2.538,33.3
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Male - VLW,14,69,5.18,2.943,52.2
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Male - VLW,14,69,4.39,2.538,40.6
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Male - VLW,14,69,9.62,5.473,34.8
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Upper middle income - DALY,14,69,4.11,2.434,40.6
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Upper middle income - DALY,14,69,4.97,2.922,52.2
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Upper middle income - DALY,14,69,3.88,2.305,43.5
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Upper middle income - DALY,14,69,8.84,5.183,37.7
+"B. Pooled across horizons 1-6, by series",ARIMA,Candidate,Upper middle income - VLW,14,69,4.16,2.502,39.1
+"B. Pooled across horizons 1-6, by series",ETS,Candidate,Upper middle income - VLW,14,69,4.90,2.936,55.1
+"B. Pooled across horizons 1-6, by series",Drift,Candidate,Upper middle income - VLW,14,69,3.96,2.394,43.5
+"B. Pooled across horizons 1-6, by series",Naive,Candidate,Upper middle income - VLW,14,69,8.74,5.214,36.2
+"C. All series, origins and horizons pooled",ARIMA,Candidate,Overall,14,552,4.18,2.368,55.1
+"C. All series, origins and horizons pooled",ETS,Candidate,Overall,14,552,4.92,2.789,55.4
+"C. All series, origins and horizons pooled",Drift,Candidate,Overall,14,552,7.07,3.943,26.3
+"C. All series, origins and horizons pooled",Naive,Candidate,Overall,14,552,12.68,7.001,22.8

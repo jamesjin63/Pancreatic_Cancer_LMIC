@@ -5,7 +5,7 @@
 # Manuscript figure: Supplementary Figure 6
 # Valuation scenario: IE = 0.5
 # Plotting code    : scripts/run_LMIC_Pancreatic_VLW_v2.R lines 763-792; forecast objects from lines 615-651
-# Shared preamble  : _common.R (= canonical script lines 1-352)
+# Shared preamble  : _common.R (= canonical script lines 1-454)
 # Output           : fig/Supplementary Figure 6 IE0.5 forecast.pdf
 #
 # Only two things differ from the canonical script: (1) the two-space for-loop indent is
@@ -49,15 +49,15 @@ primary <- proj_arima   # ARIMA is the primary model; ETS is the sensitivity mod
 obs_all <- fc_inc_raw %>% group_by(year) %>% summarise(V=sum(V),D=sum(D),.groups="drop") %>%
   mutate(Vl=NA_real_,Vh=NA_real_,Dl=NA_real_,Dh=NA_real_,type="Observed")
 pred_all <- primary$all %>% transmute(year=Year,V=VLW_billion,
-  Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,D=DALY,
-  Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
+  Vl=VLW_scenario_low_billion,Vh=VLW_scenario_high_billion,D=DALY,
+  Dl=DALY_scenario_low,Dh=DALY_scenario_high,type="Forecast")
 fc_all <- bind_rows(obs_all,pred_all)
 
 obs_inc <- fc_inc_raw %>% transmute(LMIC_group,year,V,D,Vl=NA_real_,Vh=NA_real_,
                                     Dl=NA_real_,Dh=NA_real_,type="Observed")
 pred_inc <- primary$groups %>% transmute(LMIC_group=Group,year=Year,
-  V=VLW_billion,Vl=VLW_lower_95_PI_billion,Vh=VLW_upper_95_PI_billion,
-  D=DALY,Dl=DALY_lower_95_PI,Dh=DALY_upper_95_PI,type="Forecast")
+  V=VLW_billion,Vl=VLW_scenario_low_billion,Vh=VLW_scenario_high_billion,
+  D=DALY,Dl=DALY_scenario_low,Dh=DALY_scenario_high,type="Forecast")
 fc_inc <- bind_rows(obs_inc,pred_inc)
 
 # Sex-specific direct VLW forecasts are retained as secondary descriptive series.

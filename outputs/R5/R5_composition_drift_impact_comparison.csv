@@ -1,0 +1,3 @@
+Basis,VLW_2050_fixed_composition,VLW_2050_drift_adjusted,difference_pct
+"Endpoint CAGR, 1990 and 2023 only (published basis)",1195.0592877715965,1189.1957703682187,-0.49064656987113375
+Log-linear OLS on all 34 annual observations (bounding check),1195.0592877715965,1184.8249132214944,-0.8563905284720952

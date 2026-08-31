@@ -1,0 +1,2 @@
+test,H,df,p_value,n,groups,epsilon2,eta2,note
+Kruskal-Wallis (VLW/GDP across income groups),84.85603297142677,2,3.747542460085843e-19,122,3,0.7012895286894775,0.6962691846338384,Groups are income-defined; test is descriptive of between-group rank differences (potential circularity acknowledged).
