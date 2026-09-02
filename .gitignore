@@ -1,0 +1,12 @@
+# Local R package library
+.Rlibs/
+
+# macOS system files
+.DS_Store
+**/.DS_Store
+
+# R session and temporary files
+.Rproj.user
+.Rhistory
+.RData
+*.Rproj
