@@ -2,5 +2,5 @@ Source,Dataset,Extraction_or_query_date,Classification_vintage
 Global Burden of Disease Study 2023,"Pancreatic cancer DALYs, annual 1990-2023",2026-04-05,n/a
 Global Burden of Disease Study 2023,"Healthy life expectancy (HALE), 2023",2026-04-05,n/a
 World Bank World Development Indicators,"GDP per capita and total GDP, PPP, current international $",2026-04-05,"PPP, current international $, as published at the access date"
-World Bank country classification,Income-group classification used to define the LMIC set,2026-04-05,"FY2026 (World Bank income classification in effect on the access date)"
+World Bank country classification,Income-group classification used to define the LMIC set,2026-04-05,"World Bank income classification as published at the access date"
 Natural Earth / GBD location geometry,World map geometry keyed by GBD location_id,2026-04-05,n/a

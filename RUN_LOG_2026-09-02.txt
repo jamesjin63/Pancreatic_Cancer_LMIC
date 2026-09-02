@@ -1,6 +1,6 @@
 ==============================================================================
 Clean end-to-end run of this package
-Started : 2026-09-02T11:39:49Z UTC
+Started : 2026-09-02T12:25:01Z UTC
 Host    : Darwin 23.5.0 arm64
 R       : R version 4.2.2 (2022-10-31)
 Workdir : code/   (every printed path is relative to it)
@@ -361,7 +361,7 @@ Output directory: outputs/R5
 [18/19] Supplementary Figure 11 IE1.5 age specific ... OK
 [19/19] Supplementary Figure 12 IE1.5 forecast ... OK
 
-Completed 19/19 in 51 s
+Completed 19/19 in 50 s
 
 ### [4/5] table/code/make_all_supplementary_tables.R
 [ 1/17] Supplementary Table 1 ... OK
@@ -382,7 +382,7 @@ Completed 19/19 in 51 s
 [16/17] Supplementary Table 16 ... OK
 [17/17] Supplementary Table 17 ... OK
 
-Completed 17/17 in 6.7 s
+Completed 17/17 in 6.3 s
 
 ### [5/5] scripts/make_submission_xlsx.R
 [1] "en_US.UTF-8"
@@ -418,5 +418,5 @@ Output     : outputs/submission_tables_xlsx
 Done: 23 xlsx files; 158 columns written as numeric.
 
 ==============================================================================
-Finished: 2026-09-02T11:41:29Z UTC
+Finished: 2026-09-02T12:26:39Z UTC
 ==============================================================================

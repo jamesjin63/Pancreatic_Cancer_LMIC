@@ -216,10 +216,12 @@ manifests written by `scripts/run_R5_reviewer_analyses.R`:
 
 Everything that can be read back out of the downloaded files is derived from them rather than
 typed, so the manifest cannot drift from the data. Two fields cannot be recovered from any file
-and are author knowledge: the date the query was actually run, and the World Bank fiscal-year
-classification vintage. Both live in `data_raw/EXTRACTION_DATES.csv`, and the script prints a
-loud OUTSTANDING block and refuses to pass silently while either is still a placeholder. A file
+and are author knowledge: the date the files were downloaded, and the classification vintage in
+force at that date. Both live in `data_raw/EXTRACTION_DATES.csv`, and the script prints a loud
+OUTSTANDING block and refuses to pass silently while either is still a placeholder. A file
 timestamp is not a query date and is never used as one.
 
 The data used in this analysis were obtained on **5 April 2026**, the date reported in the
-Methods and in references 19-21 of the manuscript.
+Methods and in references 19-21 of the manuscript. Every source is served from a fixed URL rather
+than as a versioned release, so that date records when the authors downloaded the files; the same
+query against the same URL returns the same data.
