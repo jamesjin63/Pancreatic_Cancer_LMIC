@@ -10,7 +10,7 @@
 - Income classification (LIC/LMIC/UMIC) & LMIC flag: data_raw/external_metadata/204_with_LMIC.csv (World Bank FY24).
 - VSL reference: US DOT 2023 guidance, VSL = US$13.2 million; US GDP pc (PPP) 2023 = US$82,304.62.
 
-Extraction/analysis date: 2026-08-31
+Extraction/analysis date: 2026-09-02
 
 # Method note (reviewers M1, M2, m2, m5)
 - Single VSLY definition: VSLY_i = VSL_i / annuity(HALE_i, r), annuity(T,r) = (1-(1+r)^-T)/r,

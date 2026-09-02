@@ -1,57 +1,99 @@
-# Supplementary Tables 1-19
+# Supplementary Tables 1-17
 
-This directory contains the 14 supplementary-table workbooks under their manuscript names and one
-standalone R entry point per table in `code/`. All wrappers reuse
-`scripts/make_submission_xlsx.R`; therefore batch and individual builds use exactly the same source
-columns, labels, numeric-cell conversion, missing-value policy, and OOXML cleanup.
+This directory holds the seventeen supplementary-table workbooks under the numbers used in the
+controlling R5 manuscript, together with one standalone R entry point per table in `code/`. Every
+wrapper reuses `scripts/make_submission_xlsx.R`, so a batch build and a single-table build execute
+identical logic: the same source columns, labels, numeric-cell conversion, missing-value policy,
+row ordering, rounding and OOXML cleanup.
 
 ## Rebuild
 
 From the package root (`code/`):
 
 ```bash
-Rscript scripts/run_LMIC_Pancreatic_VLW_R3.R
-Rscript scripts/run_R5_reviewer_analyses.R
-Rscript "table/code/make_all_supplementary_tables.R"
-Rscript "table/code/Supplementary Table 13.R"  # one table only
+Rscript scripts/run_LMIC_Pancreatic_VLW_R3.R            # the main pipeline
+Rscript scripts/run_R5_reviewer_analyses.R              # the reviewer-requested analyses
+Rscript "table/code/make_all_supplementary_tables.R"    # all seventeen workbooks
+Rscript "table/code/Supplementary Table 12.R"           # or one of them
 ```
 
-Tables 1-9 use sources in `outputs/R3_submission_tables/`. Tables 10-14 use reviewer-requested
-analyses in `outputs/R5/`. Supplementary Table 13 has two worksheets: sex-specific 2050 estimates
-and reconciliation against the primary all-LMIC total. Supplementary Table 14 has three worksheets:
-annual effective group VSLY, composition-drift sensitivity, and its estimated impact in 2050.
+The first two scripts must run first: they write the CSVs the workbooks are built from.
 
-## Source mapping
+## Numbering
 
-| Table | Source CSV(s) |
-|---|---|
-| 1 | `Supplementary Table 1_country burden.csv` |
-| 2 | `Supplementary Table 8_income-gradient regression HC3.csv` |
-| 3 | `Supplementary Table 2_country and sex burden.csv` |
-| 4 | `Supplementary Table 3_annual ETS and ARIMA projections.csv` |
-| 5 | `Supplementary Table 4_holdout validation.csv` |
-| 6 | `Supplementary Table 5_forecast and residual diagnostics.csv` |
-| 7 | `Supplementary Table 6_projection reconciliation.csv` |
-| 8 | `Supplementary Table 7_excluded-country DALY burden.csv` |
-| 9 | `Supplementary Table 9_unweighted country ASR means.csv` |
-| 10 | `R5_rolling_origin_supplementary_table.csv` |
-| 11 | `R5_rolling_origin_by_series.csv` |
-| 12 | `R5_full_sample_residual_adequacy.csv` |
-| 13 | `R5_sex_specific_2050.csv`; `R5_sex_reconciliation_2050.csv` |
-| 14 | `R5_effective_group_VSLY_by_year.csv`; `R5_fixed_composition_sensitivity.csv`; `R5_fixed_composition_impact_2050.csv` |
+These are the numbers used in the manuscript caption list, in the submitted attachment set and in
+the response letter. Earlier rounds numbered the files by the order in which the pipeline happened
+to produce them, which stopped matching the manuscript at the R5 round; Reviewer #3 hit that
+mismatch when checking whether Supplementary Table 11 contained the ARIMA coefficients its caption
+promised. For a reader holding the R4 version:
 
-## Added for Reviewer #3's Major and Minor points
+| R4 | R5 | R4 | R5 | R4 | R5 |
+|---|---|---|---|---|---|
+| S1-S3 | S1-S3 | S7 | S7 | S12 | S14 |
+| S6 | S4 | S8-S10 | S9-S11 | S13 | S15 |
+| S4 | S5 | — | **S12** (new) | S11 | S16 |
+| S5 | S6 | — | **S13** (new) | — | **S17** (new) |
+| | | — | **S8** (new) | | |
 
-| Table | Contents | Source |
+Two outputs from earlier rounds are deliberately absent, because the manuscript no longer cites
+them: the single 2018-2023 holdout validation, superseded by the rolling-origin work in S9-S11,
+and the two-model forecast/residual diagnostics, superseded by the four-model table that is now
+S16. Their CSVs are still written to `outputs/R3_submission_tables/`.
+
+The data provenance manifests and the MASE definition are deposited as CSVs in `outputs/R5/`
+(`R5_query_manifest.csv`, `R5_data_provenance_manifest.csv`, `R5_MASE_definition.csv`) rather than
+as attachments, because the manuscript states them in the Methods rather than citing a table.
+
+## Contents and sources
+
+| Table | Contents | Source CSV(s) |
 |---|---|---|
-| S12 (sheet B) | ARIMA coefficient estimates and standard errors | `outputs/R5/R5_arima_coefficients.csv` |
-| S15 | The prespecified selection rule applied to the primary DALY series, with all four methods eligible | `outputs/R5/R5_model_selection_primary_DALY.csv` |
-| S16 | Rolling-origin coverage of the complete aggregate interval construction, pooled and by horizon | `outputs/R5/R5_aggregate_interval_coverage_*.csv` |
-| S17 | Joint-simulation specification, residual correlation matrix, its eigenvalues, and measured non-negativity | four CSVs in `outputs/R5/` |
-| S18 | Composition-drift basis: endpoint CAGR versus a log-linear fit on all observations | `outputs/R5/R5_composition_drift_*.csv` |
-| S19 | Input manifest with MD5 checksums, and the MASE definition | `outputs/R5/R5_data_provenance_manifest.csv`, `R5_MASE_definition.csv` |
+| S1 | Country-level ranking of the 2023 welfare burden | `Supplementary Table 1_country burden.csv` |
+| S2 | Income-gradient regression, HC3 | `Supplementary Table 8_income-gradient regression HC3.csv` |
+| S3 | Country- and sex-specific 2023 burden | `Supplementary Table 2_country and sex burden.csv` |
+| S4 | Annual ARIMA primary and ETS sensitivity projections | `Supplementary Table 3_annual ETS and ARIMA projections.csv` |
+| S5 | Secondary sex-specific 2050 projections, reconciliation, and the sex disparity over time | `R5_sex_specific_2050.csv`; `R5_sex_reconciliation_2050.csv`; `R5_sex_gap_over_time.csv` |
+| S6 | DALY-derived versus independently projected VLW | `Supplementary Table 6_projection reconciliation.csv` |
+| S7 | Effective group VSLY by year, composition drift, and its 2050 impact | `R5_effective_group_VSLY_by_year.csv`; `R5_fixed_composition_sensitivity.csv`; `R5_fixed_composition_impact_2050.csv` |
+| **S8** | Endpoint CAGR versus an all-year log-linear fit as the composition-drift basis | `R5_composition_drift_basis_comparison.csv`; `R5_composition_drift_impact_comparison.csv` |
+| S9 | Rolling-origin validation, all series, origins and horizons pooled | `R5_rolling_origin_supplementary_table.csv`, panel C |
+| S10 | Rolling-origin validation by forecast horizon | `R5_rolling_origin_supplementary_table.csv`, panel A |
+| S11 | Rolling-origin validation by series | `R5_rolling_origin_by_series.csv` |
+| **S12** | The prespecified selection rule applied to each primary DALY series, all four methods eligible | `R5_model_selection_primary_DALY.csv` |
+| **S13** | Rolling-origin coverage of the complete aggregate range construction | `R5_aggregate_interval_coverage_overall.csv`; `R5_aggregate_interval_coverage_by_horizon.csv` |
+| S14 | Eligible, included and excluded LMICs, by income group and by country | `R5_exclusion_fractions_by_income_group.csv`; `Supplementary Table 7_excluded-country DALY burden.csv` |
+| S15 | Annual unweighted means of country-specific age-standardised DALY rates | `Supplementary Table 9_unweighted country ASR means.csv` |
+| S16 | Fitted-model specifications with AICc, and the ARIMA coefficients | `R5_full_sample_residual_adequacy.csv`; `R5_arima_coefficients.csv` |
+| **S17** | Joint-simulation specification, correlation matrix, eigenvalues, non-negativity | four CSVs in `outputs/R5/` |
 
-**Numbering note.** These files are named under the *code* numbering, which since the R5 round has
-differed from the numbering used in the manuscript (manuscript S4 is code S13, manuscript S8-S10
-are the three panels of code S10 and code S11, and so on). Reconciling the two is a separate task;
-until it is done, check the caption against the contents rather than trusting the number.
+## Presentation options in the specification
+
+Three declarative options in `scripts/make_submission_xlsx.R` exist so that the workbook a reader
+downloads here and the workbook in the submitted attachment set are the same table rather than two
+renderings of one CSV. They are applied in a fixed sequence, so a specification cannot depend on
+the order in which the options are written.
+
+| Option | Effect |
+|---|---|
+| `where` | named list, source column to permitted values; rows outside the set are dropped |
+| `order` | named list, source column to level order; rows are sorted by those levels, first key outermost |
+| `round` | named vector, output header to digits; applied after renaming, numeric columns only |
+
+Every value the specification can select or reorder must already exist in the source CSV. Nothing
+is computed here; the workbook builder never touches a number.
+
+## Relation to the submitted attachments
+
+Of the 3,536 numeric cells in the submitted workbooks, 3,534 are reproduced exactly by these
+scripts. The two that are not are a unit and a placeholder, not a disagreement:
+
+- Supplementary Table 5, sheet B reports the male-plus-female reconciliation difference as a
+  percentage (2.33%); the submitted workbook printed the same quantity as a fraction (0.0233).
+- Supplementary Table 7, sheet C leaves the primary scenario's difference from itself empty; the
+  submitted workbook printed a literal `0`.
+
+Two presentational differences remain and are deliberate. The submitted workbooks stacked
+multi-part tables onto a single worksheet behind `A -` / `B -` banner rows; these workbooks give
+each part its own worksheet, which keeps one type per column and makes every numeric cell
+computable. And where the submitted workbook carried a rounded value only, these workbooks carry
+the rounded value the manuscript quotes; the full-precision value is in the source CSV named above.

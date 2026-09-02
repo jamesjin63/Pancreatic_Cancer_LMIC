@@ -1,3 +1,3 @@
-Sex,Year,Estimand,VLW_billion,VLW_scenario_low,VLW_scenario_high,Ljung_Box_p,residual_autocorrelation_detected
-Male,2050,"Direct sex-specific VLW ARIMA forecast (secondary; descriptive only, not an inferential comparison)",676.5479562410777,603.8925438579722,749.2033686241832,0.23641052669863283,No
-Female,2050,"Direct sex-specific VLW ARIMA forecast (secondary; descriptive only, not an inferential comparison)",546.3081902695898,407.0696547093709,685.5467258298086,0.3948102268526551,No
+Sex,Method,Year,Estimand,VLW_billion,VLW_scenario_low,VLW_scenario_high,Scenario_range,Ljung_Box_p,residual_autocorrelation_detected
+Male,"ARIMA(3,1,2)",2050,"Direct sex-specific VLW ARIMA forecast (secondary; descriptive only, not an inferential comparison)",676.5479562410777,603.8925438579722,749.2033686241832,603.89-749.20,0.23641052669863283,No
+Female,"ARIMA(2,2,2)",2050,"Direct sex-specific VLW ARIMA forecast (secondary; descriptive only, not an inferential comparison)",546.3081902695898,407.0696547093709,685.5467258298086,407.07-685.55,0.3948102268526551,No
