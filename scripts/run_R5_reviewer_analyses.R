@@ -670,7 +670,8 @@ print(as.data.frame(impact %>% mutate(across(where(is.numeric), ~ round(.x, 4)))
 # To fill in the dates and the classification vintage, edit
 # data_raw/EXTRACTION_DATES.csv (created below on first run). Both fields are
 # author knowledge: neither can be recovered from the downloaded files, and a file
-# timestamp is not a query date.
+# timestamp is not a query date. Every source is served from a fixed URL rather than a versioned
+# release, so the date records when the authors downloaded the files.
 cat("\n[8] Data provenance: query manifest and file manifest ...\n")
 
 DATES_FILE <- file.path("data_raw", "EXTRACTION_DATES.csv")
@@ -690,7 +691,7 @@ if (!file.exists(DATES_FILE)) {
     Classification_vintage = c(
       "n/a", "n/a",
       "PPP, current international $, as published at the access date",
-      "TO BE SUPPLIED BY THE AUTHORS (World Bank fiscal-year classification, e.g. FY2025)",
+      "TO BE SUPPLIED BY THE AUTHORS (classification vintage at the access date)",
       "n/a")),
     DATES_FILE)
   cat("  Created ", DATES_FILE, " - fill in the extraction dates before submitting.\n", sep = "")
