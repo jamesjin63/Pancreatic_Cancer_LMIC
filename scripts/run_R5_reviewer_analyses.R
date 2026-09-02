@@ -167,6 +167,7 @@ by_series <- roll %>% group_by(series, outcome, model) %>%
             MAE = mean(abs_err), RMSE = sqrt(mean(err^2)),
             MAPE = mean(ape), MASE = mean(scaled_err),
             coverage_95 = mean(covered) * 100, .groups = "drop") %>%
+  mutate(Role = "Candidate") %>%
   arrange(series, outcome, model)
 write_csv(by_series, file.path(R5_DIR, "R5_rolling_origin_by_series.csv"))
 
@@ -254,6 +255,12 @@ arima_coefs <- map_dfr(names(series_list), function(nm) {
   fit_series(S$series, model = "ARIMA", label = S$label)$coefficients %>%
     mutate(outcome = S$outcome, .after = series)
 })
+# Print the coefficients under the names a reader of the fitted-model table expects: the
+# forecast package returns ar1/ma2/drift, the table reports AR(1)/MA(2)/Drift.
+arima_coefs <- arima_coefs %>%
+  mutate(term = sub("^([a-z]+)([0-9]+)$", "\\U\\1\\E(\\2)", term, perl = TRUE),
+         term = sub("^drift$", "Drift", term),
+         term = sub("^intercept$", "Intercept", term))
 write_csv(arima_coefs, file.path(R5_DIR, "R5_arima_coefficients.csv"))
 
 # 1f - the prespecified selection rule, applied to the primary DALY series
@@ -335,6 +342,13 @@ recon <- tibble(
   Value_billion = c(prim_2050$VLW_billion, sex_sum,
                     sex_sum - prim_2050$VLW_billion,
                     (sex_sum - prim_2050$VLW_billion) / prim_2050$VLW_billion * 100))
+# The sex-specific table reports the fitted order and one range, not two bounds in two columns.
+sex_fc <- sex_fc %>%
+  left_join(resid_ok %>% filter(model == "ARIMA", series %in% c("Male", "Female")) %>%
+              select(Sex = series, Method = method), by = "Sex") %>%
+  mutate(Scenario_range = sprintf("%.2f-%.2f", VLW_scenario_low, VLW_scenario_high),
+         .after = VLW_scenario_high) %>%
+  relocate(Method, .after = Sex)
 write_csv(sex_fc, file.path(R5_DIR, "R5_sex_specific_2050.csv"))
 write_csv(recon,  file.path(R5_DIR, "R5_sex_reconciliation_2050.csv"))
 print(as.data.frame(sex_fc), row.names = FALSE)
@@ -378,6 +392,22 @@ overall <- excl_tbl %>% summarise(
   DALY_total = sum(DALY_total), DALY_Included = sum(DALY_Included),
   DALY_Excluded = sum(DALY_Excluded), pct_DALYs_excluded = sum(DALY_Excluded)/sum(DALY_total)*100)
 excl_tbl <- bind_rows(excl_tbl, overall)
+
+# Name the excluded countries next to their count. Reviewer #3 asks which countries drop out and
+# what they carry; a bare "5" does not answer that, and the names are already in the data.
+excluded_names <- d23_all128 %>%
+  filter(!location_id %in% included) %>%
+  arrange(desc(DALY)) %>%
+  group_by(LMIC_group) %>%
+  summarise(names = paste(location_name, collapse = ", "), .groups = "drop")
+and_list <- function(x) sub(",\\s*([^,]+)$", " and \\1", x)
+excl_tbl <- excl_tbl %>%
+  left_join(excluded_names, by = "LMIC_group") %>%
+  mutate(Excluded_countries = ifelse(n_Excluded == 0 | is.na(names),
+                                     as.character(n_Excluded),
+                                     paste0(n_Excluded, " (", and_list(names), ")")),
+         .after = n_Excluded) %>%
+  select(-names)
 write_csv(excl_tbl, file.path(R5_DIR, "R5_exclusion_fractions_by_income_group.csv"))
 print(as.data.frame(excl_tbl), row.names = FALSE)
 
@@ -637,7 +667,10 @@ print(as.data.frame(impact %>% mutate(across(where(is.numeric), ~ round(.x, 4)))
 #   Sheet B (file manifest) is the checksum-level record: every input file, its size, its local
 #   timestamp, its MD5, and its shape.
 #
-# To fill in the dates, edit data_raw/EXTRACTION_DATES.csv (created below on first run).
+# To fill in the dates and the classification vintage, edit
+# data_raw/EXTRACTION_DATES.csv (created below on first run). Both fields are
+# author knowledge: neither can be recovered from the downloaded files, and a file
+# timestamp is not a query date.
 cat("\n[8] Data provenance: query manifest and file manifest ...\n")
 
 DATES_FILE <- file.path("data_raw", "EXTRACTION_DATES.csv")
@@ -653,11 +686,17 @@ if (!file.exists(DATES_FILE)) {
                 "GDP per capita and total GDP, PPP, current international $",
                 "Income-group classification used to define the LMIC set",
                 "World map geometry keyed by GBD location_id"),
-    Extraction_or_query_date = rep("TO BE SUPPLIED BY THE AUTHORS (YYYY-MM-DD)", 5)),
+    Extraction_or_query_date = rep("TO BE SUPPLIED BY THE AUTHORS (YYYY-MM-DD)", 5),
+    Classification_vintage = c(
+      "n/a", "n/a",
+      "PPP, current international $, as published at the access date",
+      "TO BE SUPPLIED BY THE AUTHORS (World Bank fiscal-year classification, e.g. FY2025)",
+      "n/a")),
     DATES_FILE)
   cat("  Created ", DATES_FILE, " - fill in the extraction dates before submitting.\n", sep = "")
 }
 dates <- read_csv(DATES_FILE, show_col_types = FALSE)
+stopifnot(all(c("Extraction_or_query_date", "Classification_vintage") %in% names(dates)))
 
 # -- derive the GBD query parameters from the downloaded files themselves ----------------------
 gbd_files <- list.files(file.path("data_raw", "gbd_daly_yearly"), full.names = TRUE,
@@ -714,11 +753,6 @@ query_manifest <- dates %>%
       paste0("GBD measure_id ", u(hale$measure_id)),
       paste(gdp_ind, collapse = ", "),
       "World Bank income groups: low, lower-middle, upper-middle",
-      "n/a"),
-    Classification_vintage = c(
-      "n/a", "n/a",
-      "PPP, current international $, as published at the access date",
-      "TO BE SUPPLIED BY THE AUTHORS (World Bank fiscal-year classification, e.g. FY2025)",
       "n/a"),
     Downloaded_files = c(
       paste0("data_raw/gbd_daly_yearly/measure2_DALYs_year{", min(gbd_years), "..",

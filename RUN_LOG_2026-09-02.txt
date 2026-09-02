@@ -1,0 +1,422 @@
+==============================================================================
+Clean end-to-end run of this package
+Started : 2026-09-02T11:39:49Z UTC
+Host    : Darwin 23.5.0 arm64
+R       : R version 4.2.2 (2022-10-31)
+Workdir : code/   (every printed path is relative to it)
+==============================================================================
+
+### [1/5] scripts/run_LMIC_Pancreatic_VLW_R3.R
+================================================================
+  Pancreatic LMIC VLW  R3 canonical  · IE=0.5/1.0/1.5
+================================================================
+
+[1] Reading data ...
+   LMIC total: 128 | with GDP: 122 | with GDP+HALE (analysed): 122 
+   Data loaded.
+
+──────── IE = 0.5 ────────
+   VLW 2023 = 1499.95 B | age-sum = 1499.95 B (diff 1.59e-12 ) |  M+F = 1499.95 B
+   2050 = 2,401.34 (2,069.77–2,729.54) B | KW p = 1.59e-07 
+──────── IE = 1.0 ────────
+   VLW 2023 = 771.97 B | age-sum = 771.97 B (diff 5.68e-13 ) |  M+F = 771.97 B
+   2050 = 1,195.06 (1,051.20–1,336.86) B | KW p = 2.65e-16 
+──────── IE = 1.5 ────────
+   VLW 2023 = 411.31 B | age-sum = 411.31 B (diff -4.55e-13 ) |  M+F = 411.31 B
+   2050 = 622.24 (554.72–688.70) B | KW p = 3.75e-19 
+
+================ RECONCILIATION ================
+# A tibble: 3 × 7
+     IE VLW_total_allages VLW_total_agesum age_vs_total_diff VLW_both
+  <dbl>             <dbl>            <dbl>             <dbl>    <dbl>
+1   0.5             1500.            1500.          1.59e-12    1500.
+2   1                772.             772.          5.68e-13     772.
+3   1.5              411.             411.         -4.55e-13     411.
+# ℹ 2 more variables: VLW_male_plus_female <dbl>, sex_vs_both_diff <dbl>
+
+ALL COMPLETE. Output: outputs/results_VLW 
+Warning messages:
+1: 程辑包‘tidyr’是用R版本4.2.3 来建造的 
+2: 程辑包‘readr’是用R版本4.2.3 来建造的 
+3: 程辑包‘dplyr’是用R版本4.2.3 来建造的 
+4: 程辑包‘stringr’是用R版本4.2.3 来建造的 
+5: 程辑包‘sf’是用R版本4.2.3 来建造的 
+6: 程辑包‘patchwork’是用R版本4.2.3 来建造的 
+
+### [2/5] scripts/run_R5_reviewer_analyses.R
+================================================================
+  Pancreatic LMIC VLW  R3 canonical  · IE=0.5/1.0/1.5
+================================================================
+
+[1] Reading data ...
+   LMIC total: 128 | with GDP: 122 | with GDP+HALE (analysed): 122 
+   Data loaded.
+
+Warning messages:
+1: 程辑包‘tidyr’是用R版本4.2.3 来建造的 
+2: 程辑包‘readr’是用R版本4.2.3 来建造的 
+3: 程辑包‘dplyr’是用R版本4.2.3 来建造的 
+4: 程辑包‘stringr’是用R版本4.2.3 来建造的 
+5: 程辑包‘sf’是用R版本4.2.3 来建造的 
+6: 程辑包‘patchwork’是用R版本4.2.3 来建造的 
+[0] Eight series built (1990-2023, 34 observations each)
+
+[1] Rolling-origin validation: 8 series x 14 origins x 4 models ...
+    Low income DALY done
+    Low income VLW done
+    Lower middle income DALY done
+    Lower middle income VLW done
+    Upper middle income DALY done
+    Upper middle income VLW done
+    Male VLW done
+    Female VLW done
+
+  -- Prespecified selection on the primary DALY series (all four models eligible) --
+              Series Outcome Model      Role Ljung_Box_p
+          Low income    DALY ARIMA Candidate      0.9131
+          Low income    DALY   ETS Candidate      0.5593
+          Low income    DALY Drift Candidate      0.0000
+          Low income    DALY Naive Candidate      0.0000
+ Lower middle income    DALY ARIMA Candidate      0.5923
+ Lower middle income    DALY   ETS Candidate      0.4393
+ Lower middle income    DALY Drift Candidate      0.0000
+ Lower middle income    DALY Naive Candidate      0.0000
+ Upper middle income    DALY Drift Candidate      0.0163
+ Upper middle income    DALY ARIMA Candidate      0.2882
+ Upper middle income    DALY   ETS Candidate      0.0011
+ Upper middle income    DALY Naive Candidate      0.0308
+ Residual_autocorrelation_detected Eligible_under_rule    MAPE    MASE
+                                No                 Yes  4.2361  2.5657
+                                No                 Yes  4.9323  2.9822
+                               Yes                  No 11.8668  7.0169
+                               Yes                  No 17.2833 10.1816
+                                No                 Yes  4.1897  2.0480
+                                No                 Yes  4.4944  2.2138
+                               Yes                  No  8.6330  4.2617
+                               Yes                  No 15.4227  7.5081
+                               Yes                  No  3.8764  2.3051
+                                No                 Yes  4.1072  2.4339
+                               Yes                  No  4.9679  2.9224
+                               Yes                  No  8.8425  5.1828
+ coverage_95 Rank_by_MAPE Selected
+     69.5652            1      Yes
+     60.8696            2       No
+      4.3478            3       No
+      4.3478            4       No
+     66.6667            1      Yes
+     60.8696            2       No
+     15.9420            3       No
+     14.4928            4       No
+     43.4783            1       No
+     40.5797            2      Yes
+     52.1739            3       No
+     37.6812            4       No
+
+  Selected: Low income -> ARIMA; Lower middle income -> ARIMA; Upper middle income -> ARIMA
+
+  -- By horizon (all series pooled) --
+ model h n_origins n_obs       MAE      RMSE      MAPE       MASE coverage_95
+ ARIMA 1        14   112  11057.48  35676.70  1.426593  0.7157749   58.928571
+ ARIMA 2        13   104  25902.72  82458.31  3.195311  1.7092942   58.653846
+ ARIMA 3        12    96  30427.06  90638.91  4.272874  2.3775629   55.208333
+ ARIMA 4        11    88  35265.19  98546.63  5.109182  2.8992351   53.409091
+ ARIMA 5        10    80  36821.64  95201.34  5.684343  3.3058248   53.750000
+ ARIMA 6         9    72  44309.56 102684.17  6.958161  4.1892782   47.222222
+ Drift 1        14   112  14059.35  41773.22  2.540290  1.2501632   45.535714
+ Drift 2        13   104  25495.35  70925.18  4.792468  2.4749285   37.500000
+ Drift 3        12    96  35220.59  90267.39  6.840659  3.6783242   26.041667
+ Drift 4        11    88  41169.03  95982.61  8.500021  4.7135230   20.454545
+ Drift 5        10    80  49301.39 105440.18 10.328007  5.9456652   10.000000
+ Drift 6         9    72  60475.23 127213.84 12.354921  7.4408122    5.555556
+   ETS 1        14   112  14078.64  48686.41  1.684144  0.8589047   64.285714
+   ETS 2        13   104  24059.88  81592.25  3.131092  1.6823409   58.653846
+   ETS 3        12    96  38200.45 118346.42  5.037482  2.8048302   51.041667
+   ETS 4        11    88  44659.06 130310.65  6.276878  3.5676574   48.863636
+   ETS 5        10    80  44387.39 113618.18  7.037409  4.0766317   56.250000
+   ETS 6         9    72  49690.04 114910.23  8.343861  4.9827936   50.000000
+ Naive 1        14   112  21891.27  58569.52  4.191117  2.0278516   53.571429
+ Naive 2        13   104  44761.91 110495.12  8.228013  4.1880136   30.769231
+ Naive 3        12    96  67179.97 155090.59 12.096410  6.4256941   20.833333
+ Naive 4        11    88  87041.44 189987.35 15.563195  8.5482200   12.500000
+ Naive 5        10    80 108443.52 229762.19 19.036127 10.8540819    3.750000
+ Naive 6         9    72 131742.30 277417.95 22.497198 13.3914562    0.000000
+
+  -- Overall model ranking --
+ model      Role n_obs      MAPE     MASE MAE_rel_naive coverage_95
+ ARIMA Candidate   552  4.180489 2.368489     0.4173387    55.07246
+   ETS Candidate   552  4.916616 2.788533     0.5505106    55.43478
+ Drift Candidate   552  7.071430 3.943318     0.6220485    26.26812
+ Naive Candidate   552 12.678666 7.000533     1.0000000    22.82609
+ n_series_lowest_MAPE_of_4 n_series_beats_ETS_MAPE
+                         4                       8
+                         0                       0
+                         4                       0
+                         0                       0
+
+  -- Supplementary rolling-origin table: 60 rows --
+
+[2] Sex-specific 2050 projections and reconciliation ...
+
+[2] Primary model selected by the prespecified rule: ARIMA
+    Sex       Method Year
+   Male ARIMA(3,1,2) 2050
+ Female ARIMA(2,2,2) 2050
+                                                                                            Estimand
+ Direct sex-specific VLW ARIMA forecast (secondary; descriptive only, not an inferential comparison)
+ Direct sex-specific VLW ARIMA forecast (secondary; descriptive only, not an inferential comparison)
+ VLW_billion VLW_scenario_low VLW_scenario_high Scenario_range Ljung_Box_p
+    676.5480         603.8925          749.2034  603.89-749.20   0.2364105
+    546.3082         407.0697          685.5467  407.07-685.55   0.3948102
+ residual_autocorrelation_detected
+                                No
+                                No
+                                                Quantity Value_billion
+            Primary: DALY-derived VLW, all LMICs (ARIMA)   1195.059288
+ Secondary: direct sex-specific VLW ARIMA, Male + Female   1222.856147
+                                     Absolute difference     27.796859
+                                 Relative difference (%)      2.325982
+ Year     Male   Female Male_to_Female
+ 1990 178.0862 119.8452       1.485969
+ 2023 470.6268 301.3429       1.561765
+ 2050 676.5480 546.3082       1.238400
+                                         Basis
+                                      Observed
+                                      Observed
+ Secondary direct ARIMA forecast (descriptive)
+
+[3] Exclusion fractions by income group ...
+          LMIC_group n_eligible n_Included n_Excluded
+          Low income         25         20          5
+ Lower middle income         50         50          0
+ Upper middle income         53         52          1
+           All LMICs        128        122          6
+                                                                              Excluded_countries
+ 5 (Democratic People's Republic of Korea, Syrian Arab Republic, Yemen, South Sudan and Eritrea)
+                                                                                               0
+                                                                                        1 (Cuba)
+                                                                                               6
+ pct_countries_excluded DALY_total DALY_Included DALY_Excluded
+              20.000000   210793.1      142829.7      67963.38
+               0.000000  1467499.6     1467499.6          0.00
+               1.886792  4882247.5     4858325.6      23921.97
+               4.687500  6560540.2     6468654.9      91885.35
+ pct_DALYs_excluded
+         32.2417515
+          0.0000000
+          0.4899786
+          1.4005760
+
+[4] Historical composition drift in the effective group VSLY ...
+          LMIC_group Vbar_1990 Vbar_2023 change_1990_2023_pct
+          Low income  13513.85  13652.94             1.029238
+ Lower middle income  57351.03  60365.16             5.255591
+ Upper middle income 142924.15 140261.04            -1.863302
+ annualised_drift_pct       min       max implied_27yr_drift_pct
+           0.03103443  13513.85  13801.80               0.841319
+           0.15533690  57351.03  60553.79               4.279898
+          -0.05698013 140184.61 143240.99              -1.527121
+                                                         Scenario
+                              Fixed 2023 effective VSLY (primary)
+ Effective VSLY extrapolated at historical composition-drift rate
+                                                   Difference (%)
+ VLW_2050_billion
+     1195.0592878
+     1189.1957704
+       -0.4906466
+
+[4] done
+[5] Rolling-origin coverage of the aggregate interval construction ...
+    ETS done
+    ARIMA done
+    Naive done
+    Drift done
+
+  -- Aggregate construction, pooled over origins and horizons --
+ model n_origins n_obs DALY_MAPE DALY_coverage VLW_MAPE VLW_coverage
+ ARIMA        14    69      4.03         43.48     4.08        42.03
+   ETS        14    69      4.47         50.72     4.75        49.28
+ Drift        14    69      4.61         39.13     4.17        42.03
+ Naive        14    69     10.36         26.09     9.42        31.88
+ mean_relative_width_pct total_nonpositive_group_draws
+                    5.54                             0
+                    9.36                             0
+                    4.94                             0
+                   13.56                             0
+
+  -- Aggregate construction, by horizon --
+ model h n_origins n_obs DALY_MAPE DALY_coverage VLW_MAPE VLW_coverage
+ ARIMA 1        14    14      1.52         50.00     1.54        42.86
+ ARIMA 2        13    13      3.53         46.15     3.74        46.15
+ ARIMA 3        12    12      4.19         50.00     4.56        41.67
+ ARIMA 4        11    11      4.87         54.55     5.05        54.55
+ ARIMA 5        10    10      5.07         40.00     4.89        40.00
+ ARIMA 6         9     9      6.27         11.11     5.80        22.22
+ Drift 1        14    14      1.60         64.29     1.77        64.29
+ Drift 2        13    13      3.00         53.85     3.17        61.54
+ Drift 3        12    12      4.39         41.67     4.20        41.67
+ Drift 4        11    11      5.46         27.27     4.76        36.36
+ Drift 5        10    10      6.79         20.00     5.64        20.00
+ Drift 6         9     9      8.46         11.11     6.94        11.11
+   ETS 1        14    14      1.72         57.14     2.01        50.00
+   ETS 2        13    13      3.14         53.85     3.40        53.85
+   ETS 3        12    12      5.36         41.67     5.74        41.67
+   ETS 4        11    11      5.83         45.45     6.36        45.45
+   ETS 5        10    10      5.70         50.00     5.91        50.00
+   ETS 6         9     9      6.44         55.56     6.41        55.56
+ Naive 1        14    14      3.28         64.29     2.93        64.29
+ Naive 2        13    13      6.63         46.15     6.04        46.15
+ Naive 3        12    12      9.85         25.00     8.94        41.67
+ Naive 4        11    11     12.69          0.00    11.49        18.18
+ Naive 5        10    10     15.66          0.00    14.23         0.00
+ Naive 6         9     9     18.74          0.00    17.12         0.00
+ mean_relative_width_pct
+                    2.22
+                    4.22
+                    5.55
+                    6.74
+                    7.78
+                    8.65
+                    3.26
+                    4.32
+                    4.96
+                    5.58
+                    6.07
+                    6.38
+                    2.94
+                    5.55
+                    8.44
+                   11.55
+                   14.63
+                   17.53
+                    7.98
+                   11.11
+                   13.47
+                   15.57
+                   17.46
+                   19.08
+
+[6] Joint-simulation transparency outputs ...
+                    Matrix               Group Low income Lower middle income
+               Raw Pearson          Low income  1.0000000           0.4820700
+               Raw Pearson Lower middle income  0.4820700           1.0000000
+               Raw Pearson Upper middle income  0.7015811           0.6455903
+ After eigenvalue clipping          Low income  1.0000000           0.4820700
+ After eigenvalue clipping Lower middle income  0.4820700           1.0000000
+ After eigenvalue clipping Upper middle income  0.7015811           0.6455903
+ Upper middle income
+           0.7015811
+           0.6455903
+           1.0000000
+           0.7015811
+           0.6455903
+           1.0000000
+ component eigenvalue_raw eigenvalue_after_clip clip_was_binding
+         1      2.2239973             2.2239973               No
+         2      0.5212953             0.5212953               No
+         3      0.2547074             0.2547074               No
+
+  Non-positive draws across all horizons: group-level 0 of 4,050,000; aggregate-level 0
+
+[7] Composition drift: endpoint basis stated, and compared with a full-series fit ...
+          LMIC_group Vbar_1990 Vbar_2023 endpoint_cagr_pct loglinear_cagr_pct
+          Low income  13513.85  13652.94            0.0310             0.0196
+ Lower middle income  57351.03  60365.16            0.1553             0.1716
+ Upper middle income 142924.15 140261.04           -0.0570            -0.0775
+ loglinear_r2 absolute_difference_pp
+       0.1316                -0.0115
+       0.7871                 0.0163
+       0.8224                -0.0205
+                                                         Basis
+           Endpoint CAGR, 1990 and 2023 only (published basis)
+ Log-linear OLS on all 34 annual observations (bounding check)
+ VLW_2050_fixed_composition VLW_2050_drift_adjusted difference_pct
+                   1195.059                1189.196        -0.4906
+                   1195.059                1184.825        -0.8564
+
+[8] Data provenance: query manifest and file manifest ...
+  38 input files catalogued with size, timestamp, MD5 and shape.
+  All extraction dates and vintages supplied.
+
+==================== Done ====================
+Output directory: outputs/R5
+
+### [3/5] fig/code/make_all_figures.R
+[ 1/19] Figure 1 2023 snapshot ... OK
+[ 2/19] Figure 2 trends ... OK
+[ 3/19] Figure 3 unweighted mean country ASR and fold change ... OK
+[ 4/19] Figure 4 maps ... OK
+[ 5/19] Figure 5 age specific ... OK
+[ 6/19] Figure 6 forecast 2050 ... OK
+[ 7/19] Figure 7 IE sensitivity ... OK
+[ 8/19] Supplementary Figure 1 IE0.5 snapshot ... OK
+[ 9/19] Supplementary Figure 2 IE0.5 trends ... OK
+[10/19] Supplementary Figure 3 IE0.5 unweighted mean country ASR ... OK
+[11/19] Supplementary Figure 4 IE0.5 maps ... OK
+[12/19] Supplementary Figure 5 IE0.5 age specific ... OK
+[13/19] Supplementary Figure 6 IE0.5 forecast ... OK
+[14/19] Supplementary Figure 7 IE1.5 snapshot ... OK
+[15/19] Supplementary Figure 8 IE1.5 trends ... OK
+[16/19] Supplementary Figure 9 IE1.5 unweighted mean country ASR ... OK
+[17/19] Supplementary Figure 10 IE1.5 maps ... OK
+[18/19] Supplementary Figure 11 IE1.5 age specific ... OK
+[19/19] Supplementary Figure 12 IE1.5 forecast ... OK
+
+Completed 19/19 in 51 s
+
+### [4/5] table/code/make_all_supplementary_tables.R
+[ 1/17] Supplementary Table 1 ... OK
+[ 2/17] Supplementary Table 2 ... OK
+[ 3/17] Supplementary Table 3 ... OK
+[ 4/17] Supplementary Table 4 ... OK
+[ 5/17] Supplementary Table 5 ... OK
+[ 6/17] Supplementary Table 6 ... OK
+[ 7/17] Supplementary Table 7 ... OK
+[ 8/17] Supplementary Table 8 ... OK
+[ 9/17] Supplementary Table 9 ... OK
+[10/17] Supplementary Table 10 ... OK
+[11/17] Supplementary Table 11 ... OK
+[12/17] Supplementary Table 12 ... OK
+[13/17] Supplementary Table 13 ... OK
+[14/17] Supplementary Table 14 ... OK
+[15/17] Supplementary Table 15 ... OK
+[16/17] Supplementary Table 16 ... OK
+[17/17] Supplementary Table 17 ... OK
+
+Completed 17/17 in 6.7 s
+
+### [5/5] scripts/make_submission_xlsx.R
+[1] "en_US.UTF-8"
+Warning message:
+程辑包‘readr’是用R版本4.2.3 来建造的 
+Source CSVs: outputs/R3_submission_tables
+Output     : outputs/submission_tables_xlsx
+
+  Table 1.xlsx                   <- Main Table 1_2023 income summary.csv                       [Sheet1: 4 x 7]
+  Table 2.xlsx                   <- Main Table 2_sex-specific burden.csv                       [Sheet1: 9 x 6]
+  Table 3.xlsx                   <- Main Table 3_temporal trends.csv                           [Sheet1: 12 x 4]
+  Table 4.xlsx                   <- Main Table 4_age-specific burden.csv                       [Sheet1: 20 x 4]
+  Table 5.xlsx                   <- Main Table 5_selected projections.csv                      [Sheet1: 18 x 5]
+  Table 6.xlsx                   <- Main Table 6_income-elasticity sensitivity.csv             [Sheet1: 3 x 4]
+  Supplementary Table 1.xlsx     <- Supplementary Table 1_country burden.csv                   [Sheet1: 122 x 7]
+  Supplementary Table 2.xlsx     <- Supplementary Table 8_income-gradient regression HC3.csv   [Sheet1: 1 x 11]
+  Supplementary Table 3.xlsx     <- Supplementary Table 2_country and sex burden.csv           [Sheet1: 366 x 7]
+  Supplementary Table 4.xlsx     <- Supplementary Table 3_annual ETS and ARIMA projections.csv [Sheet1: 54 x 9]
+  Supplementary Table 5.xlsx     <- R5_sex_specific_2050.csv + R5_sex_reconciliation_2050.csv + R5_sex_gap_over_time.csv [A - Sex-specific 2050: 2 x 10; B - Reconciliation: 4 x 2; C - Sex disparity: 3 x 5]
+  Supplementary Table 6.xlsx     <- Supplementary Table 6_projection reconciliation.csv        [Sheet1: 162 x 7]
+  Supplementary Table 7.xlsx     <- R5_effective_group_VSLY_by_year.csv + R5_fixed_composition_sensitivity.csv + R5_fixed_composition_impact_2050.csv [A - Effective VSLY: 102 x 3; B - Composition drift: 3 x 8; C - Impact in 2050: 6 x 7]
+  Supplementary Table 8.xlsx     <- R5_composition_drift_basis_comparison.csv + R5_composition_drift_impact_comparison.csv [A - Drift basis: 3 x 7; B - Impact in 2050: 2 x 4]
+  Supplementary Table 9.xlsx     <- R5_rolling_origin_supplementary_table.csv                  [Sheet1: 4 x 6]
+  Supplementary Table 10.xlsx    <- R5_rolling_origin_supplementary_table.csv                  [Sheet1: 24 x 8]
+  Supplementary Table 11.xlsx    <- R5_rolling_origin_by_series.csv                            [Sheet1: 32 x 8]
+  Supplementary Table 12.xlsx    <- R5_model_selection_primary_DALY.csv                        [Sheet1: 12 x 12]
+  Supplementary Table 13.xlsx    <- R5_aggregate_interval_coverage_overall.csv + R5_aggregate_interval_coverage_by_horizon.csv [A - Pooled: 4 x 9; B - By horizon: 24 x 9]
+  Supplementary Table 14.xlsx    <- R5_exclusion_fractions_by_income_group.csv + Supplementary Table 7_excluded-country DALY burden.csv [A - By income group: 4 x 8; B - By country: 7 x 7]
+  Supplementary Table 15.xlsx    <- Supplementary Table 9_unweighted country ASR means.csv     [Sheet1: 102 x 3]
+  Supplementary Table 16.xlsx    <- R5_full_sample_residual_adequacy.csv + R5_arima_coefficients.csv [A - Fitted models: 32 x 16; B - ARIMA coefficients: 21 x 7]
+  Supplementary Table 17.xlsx    <- R5_joint_simulation_specification.csv + R5_residual_correlation_matrix.csv + R5_correlation_eigenvalues.csv + R5_simulation_nonnegativity.csv [A - Specification: 14 x 2; B - Residual correlation: 6 x 5; C - Eigenvalues: 3 x 4; D - Non-negativity: 27 x 7]
+
+Done: 23 xlsx files; 158 columns written as numeric.
+
+==============================================================================
+Finished: 2026-09-02T11:41:29Z UTC
+==============================================================================
