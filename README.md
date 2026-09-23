@@ -6,6 +6,11 @@ trends from 1990 to 2023 and projections to 2050* (manuscript ISCIENCE-D-26-0597
 The study quantifies the welfare-based economic burden (value of lost welfare, VLW) of pancreatic
 cancer across 122 low- and middle-income countries from 1990 to 2023, and projects it to 2050.
 
+> **Authenticity and contact.** All code and data in this repository are the actual code and data
+> used to produce the results reported in the manuscript. If you find any inconsistency, or need
+> any modification or further information, please contact the corresponding authors:
+> Qikai Sun (sunqk03251018@163.com) and Cheng Wang (wangc1203@ustc.edu.cn).
+
 ## Repository contents
 
 | Path | Contents |
