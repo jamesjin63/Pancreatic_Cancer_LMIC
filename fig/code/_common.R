@@ -33,7 +33,7 @@ source(file.path(CODE_DIR, "scripts", "_env.R"))   # pin ggplot2/scales; see tha
 #   4. All-LMIC prediction intervals use 50,000 joint paths with empirical
 #      residual correlation; subgroup interval endpoints are never summed.
 #   5. Non-seasonal ARIMA is the primary model and damped-trend ETS is the
-#      sensitivity model. Selected by a prespecified rule (lowest pooled
+#      sensitivity model. Selected by a rule predefined for R6 (lowest pooled
 #      rolling-origin MAPE among candidates for which the Ljung-Box test does not detect
 #      residual autocorrelation at the 5% level); see
 #      scripts/run_R5_reviewer_analyses.R.

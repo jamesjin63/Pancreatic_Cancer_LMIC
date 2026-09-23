@@ -8,7 +8,7 @@
 # -- The numbered comments (sections 1-4) --------------------------------------------------
 #   Comment 2: rolling-origin validation (multiple origins x multiple horizons), naive and drift
 #              models, horizon-specific errors, empirical coverage of the nominal 95% range, and
-#              a prespecified model-selection rule
+#              a model-selection rule predefined for R6
 #   Comment 3: tabulated sex-specific 2050 projections and reconciliation with the primary estimand
 #   Comment 6: exclusion fractions by income group, on both a country count and a DALY basis
 #   Comment 4: sensitivity of the fixed within-group composition assumption
@@ -86,7 +86,7 @@ cat("[0] Eight series built (1990-2023, 34 observations each)\n\n")
 # ══════════════════════════════════════════════════════════════════════════════
 # 1. Comment 2 - rolling-origin validation
 # ══════════════════════════════════════════════════════════════════════════════
-# Design (prespecified, not chosen after seeing results):
+# Design (predefined for R6, at the revision stage):
 #   minimum training window = 20 years (1990-2009)  ->  origins = 2009, 2010, ..., 2022 (14)
 #   horizons h = 1..6, truncated at each origin by the 2023 end of data (h <= 2023 - origin)
 #   four models: ETS(AAN, damped) / ARIMA(auto, non-seasonal) / Naive (random walk) /
@@ -263,7 +263,7 @@ arima_coefs <- arima_coefs %>%
          term = sub("^intercept$", "Intercept", term))
 write_csv(arima_coefs, file.path(R5_DIR, "R5_arima_coefficients.csv"))
 
-# 1f - the prespecified selection rule, applied to the primary DALY series
+# 1f - the selection rule predefined for R6, applied to the primary DALY series
 # Rule, stated before the results were seen and unchanged since:
 #   among candidate models whose residuals show no detected autocorrelation at the 5% level,
 #   select the model with the lowest pooled rolling-origin MAPE over horizons 1-6.
@@ -286,7 +286,7 @@ selection <- sel_pool %>% filter(outcome == "DALY") %>%
             Selected = ifelse(selected, "Yes", "No")) %>%
   arrange(Series, Rank_by_MAPE)
 write_csv(selection, file.path(R5_DIR, "R5_model_selection_primary_DALY.csv"))
-cat("\n  -- Prespecified selection on the primary DALY series (all four models eligible) --\n")
+cat("\n  -- Selection predefined for R6 on the primary DALY series (all four models eligible) --\n")
 print(as.data.frame(selection %>% mutate(across(where(is.numeric), ~ round(.x, 4)))),
       row.names = FALSE)
 sel_models <- selection %>% filter(Selected == "Yes")
@@ -304,7 +304,7 @@ cat("\n  -- Supplementary rolling-origin table:", nrow(roll_tab), "rows --\n")
 cat("\n[2] Sex-specific 2050 projections and reconciliation ...\n")
 vsly_2023 <- inc_raw %>% filter(year == 2023) %>%
   transmute(LMIC_group, VSLY_effective = V * 1e9 / D)
-# Major 1: the primary model is whatever the prespecified rule selects in step 1f, with all
+# Major 1: the primary model is whatever the rule predefined for R6 selects in step 1f, with all
 # four methods eligible. The rule is: among candidates showing no detected residual
 # autocorrelation at the 5% level, take the lowest pooled rolling-origin MAPE over horizons 1-6,
 # applied per primary DALY series. Reading the selection here rather than hard-coding a model
@@ -314,7 +314,7 @@ if (length(sel_primary) != 1L)
   stop("The selection rule chose different models across the primary DALY series (",
        paste(sel_models$Model, collapse = ", "),
        "). The aggregate projection assumes one common model; resolve this before proceeding.")
-cat("\n[2] Primary model selected by the prespecified rule: ", sel_primary, "\n", sep = "")
+cat("\n[2] Primary model selected by the rule predefined for R6: ", sel_primary, "\n", sep = "")
 primary <- joint_income_projection(inc_raw, vsly_2023, sel_primary, seed = 20260725L)
 
 sex_fc <- map_dfr(c("Male", "Female"), function(sx) {
@@ -691,7 +691,7 @@ if (!file.exists(DATES_FILE)) {
     Classification_vintage = c(
       "n/a", "n/a",
       "PPP, current international $, as published at the access date",
-      "TO BE SUPPLIED BY THE AUTHORS (classification vintage at the access date)",
+      "TO BE SUPPLIED BY THE AUTHORS (classification vintage current at the access date)",
       "n/a")),
     DATES_FILE)
   cat("  Created ", DATES_FILE, " - fill in the extraction dates before submitting.\n", sep = "")
@@ -763,15 +763,15 @@ query_manifest <- dates %>%
       "data_raw/external_metadata/204_with_LMIC.csv",
       "data_raw/external_metadata/df_world2.geojson"),
     Licence_and_redistribution = c(
-      rep("IHME GBD terms of use; not redistributed with the code", 2),
-      "World Bank open data terms (CC BY 4.0); not redistributed with the code",
-      "World Bank open data terms (CC BY 4.0); not redistributed with the code",
-      "Not redistributed with the code"))
+      rep("IHME GBD terms of use; not redistributed in the public repository (MD5 in data_raw/CHECKSUMS.md5)", 2),
+      "World Bank open data terms (CC BY 4.0); redistributed with attribution",
+      "World Bank open data terms (CC BY 4.0); redistributed with attribution (joined to GBD location_id by the authors)",
+      "Natural Earth (public domain); redistributed, joined to GBD location_id by the authors"))
 write_csv(query_manifest, file.path(R5_DIR, "R5_query_manifest.csv"))
 
 # -- file-level manifest with checksums and shapes ---------------------------------------------
 raw_files <- list.files("data_raw", full.names = TRUE, recursive = TRUE)
-raw_files <- raw_files[!grepl("(^|/)\\.DS_Store$|EXTRACTION_DATES\\.csv$", raw_files)]
+raw_files <- raw_files[!grepl("(^|/)\\.DS_Store$|EXTRACTION_DATES\\.csv$|CHECKSUMS\\.md5$|README\\.md$", raw_files)]
 shape <- function(p) {
   if (!grepl("\\.csv$", p)) return(c(NA_integer_, NA_integer_))
   d <- suppressWarnings(read_csv(p, show_col_types = FALSE, progress = FALSE))

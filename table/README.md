@@ -1,7 +1,7 @@
 # Supplementary Tables 1-17
 
 This directory holds the seventeen supplementary-table workbooks under the numbers used in the
-controlling R5 manuscript, together with one standalone R entry point per table in `code/`. Every
+R6 manuscript (ISCIENCE-D-26-05974R6), together with one standalone R entry point per table in `code/`. Every
 wrapper reuses `scripts/make_submission_xlsx.R`, so a batch build and a single-table build execute
 identical logic: the same source columns, labels, numeric-cell conversion, missing-value policy,
 row ordering, rounding and OOXML cleanup.
@@ -27,7 +27,7 @@ to produce them, which stopped matching the manuscript at the R5 round; Reviewer
 mismatch when checking whether Supplementary Table 11 contained the ARIMA coefficients its caption
 promised. For a reader holding the R4 version:
 
-| R4 | R5 | R4 | R5 | R4 | R5 |
+| R4 | R6 | R4 | R6 | R4 | R6 |
 |---|---|---|---|---|---|
 | S1-S3 | S1-S3 | S7 | S7 | S12 | S14 |
 | S6 | S4 | S8-S10 | S9-S11 | S13 | S15 |
@@ -59,7 +59,7 @@ as attachments, because the manuscript states them in the Methods rather than ci
 | S9 | Rolling-origin validation, all series, origins and horizons pooled | `R5_rolling_origin_supplementary_table.csv`, panel C |
 | S10 | Rolling-origin validation by forecast horizon | `R5_rolling_origin_supplementary_table.csv`, panel A |
 | S11 | Rolling-origin validation by series | `R5_rolling_origin_by_series.csv` |
-| **S12** | The prespecified selection rule applied to each primary DALY series, all four methods eligible | `R5_model_selection_primary_DALY.csv` |
+| **S12** | The selection rule predefined for R6, applied to each primary DALY series, all four methods eligible | `R5_model_selection_primary_DALY.csv` |
 | **S13** | Rolling-origin coverage of the complete aggregate range construction | `R5_aggregate_interval_coverage_overall.csv`; `R5_aggregate_interval_coverage_by_horizon.csv` |
 | S14 | Eligible, included and excluded LMICs, by income group and by country | `R5_exclusion_fractions_by_income_group.csv`; `Supplementary Table 7_excluded-country DALY burden.csv` |
 | S15 | Annual unweighted means of country-specific age-standardised DALY rates | `Supplementary Table 9_unweighted country ASR means.csv` |

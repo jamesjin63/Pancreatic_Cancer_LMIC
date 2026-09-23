@@ -111,7 +111,7 @@ spec <- list(
   # ============================================================================================
   # Supplementary tables S1-S17.
   #
-  # NUMBERING. These are the numbers used in the controlling R5 manuscript, in the order its
+  # NUMBERING. These are the numbers used in the R6 manuscript, in the order its
   # caption list gives them, and they are the numbers used in the submitted attachment set and in
   # the response letter. Earlier rounds numbered these files by the order in which the pipeline
   # happened to produce them; that scheme stopped matching the manuscript at the R5 round, and
@@ -304,7 +304,7 @@ spec <- list(
        round = c("MAPE (%)" = 2, "MASE" = 3,
                  "Empirical coverage of nominal 95% model-generated range (%)" = 1)),
 
-  # S12 - the prespecified rule applied with every evaluated method eligible, on the primary
+  # S12 - the selection rule predefined for R6, applied with every evaluated method eligible, on the primary
   #       DALY series. This is what lets a reader verify that nothing was excluded after the
   #       fact and that drift and naive fail on the residual criterion (Major 1a, 1b).
   list(out = "Supplementary Table 12.xlsx", dir = "R5",
@@ -314,7 +314,7 @@ spec <- list(
                 "MAPE", "MASE", "coverage_95", "Rank_by_MAPE", "Selected"),
        header = c("Primary DALY series", "Outcome", "Model", "Model role", "Ljung-Box p value",
                   "Residual autocorrelation detected at the 5% level",
-                  "Eligible under the prespecified rule", "MAPE (%)", "MASE",
+                  "Eligible under the selection rule predefined for R6", "MAPE (%)", "MASE",
                   "Empirical coverage of the nominal 95% range (%)",
                   "Rank by MAPE among all four candidates", "Selected")),
 
@@ -377,7 +377,7 @@ spec <- list(
                   "Mean country-specific age-standardized DALY rate (per 100,000 population)")),
 
   # ============================================================================================
-  # S14-S19: new at this round. Appended, so nothing already cited has to be renumbered.
+  # S16-S17: the remaining tables of the R6 set (Supplementary Tables 1-17).
   # ============================================================================================
 
   # S16 - manuscript: "Fitted-model specifications, parameter estimates, information criteria,

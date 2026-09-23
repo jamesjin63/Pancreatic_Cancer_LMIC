@@ -10,3 +10,8 @@
 .Rhistory
 .RData
 *.Rproj
+
+# GBD 2023 source extracts: IHME terms of use, not redistributed.
+# MD5 checksums are in data_raw/CHECKSUMS.md5; acquisition steps in data_raw/README.md.
+data_raw/gbd_daly_yearly/
+data_raw/external_metadata/HALE.csv

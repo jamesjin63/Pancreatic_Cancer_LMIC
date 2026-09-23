@@ -1,12 +1,6 @@
-==============================================================================
-Clean end-to-end run of this package
-Started : 2026-09-02T12:25:01Z UTC
-Host    : Darwin 23.5.0 arm64
-R       : R version 4.2.2 (2022-10-31)
-Workdir : code/   (every printed path is relative to it)
-==============================================================================
+# Clean run 2026年 9月23日 星期三 07时16分12秒 CEST
 
-### [1/5] scripts/run_LMIC_Pancreatic_VLW_R3.R
+=================== Rscript scripts/run_LMIC_Pancreatic_VLW_R3.R
 ================================================================
   Pancreatic LMIC VLW  R3 canonical  · IE=0.5/1.0/1.5
 ================================================================
@@ -42,8 +36,9 @@ Warning messages:
 4: 程辑包‘stringr’是用R版本4.2.3 来建造的 
 5: 程辑包‘sf’是用R版本4.2.3 来建造的 
 6: 程辑包‘patchwork’是用R版本4.2.3 来建造的 
+exit=0
 
-### [2/5] scripts/run_R5_reviewer_analyses.R
+=================== Rscript scripts/run_R5_reviewer_analyses.R
 ================================================================
   Pancreatic LMIC VLW  R3 canonical  · IE=0.5/1.0/1.5
 ================================================================
@@ -71,7 +66,7 @@ Warning messages:
     Male VLW done
     Female VLW done
 
-  -- Prespecified selection on the primary DALY series (all four models eligible) --
+  -- Selection predefined for R6 on the primary DALY series (all four models eligible) --
               Series Outcome Model      Role Ljung_Box_p
           Low income    DALY ARIMA Candidate      0.9131
           Low income    DALY   ETS Candidate      0.5593
@@ -157,7 +152,7 @@ Warning messages:
 
 [2] Sex-specific 2050 projections and reconciliation ...
 
-[2] Primary model selected by the prespecified rule: ARIMA
+[2] Primary model selected by the rule predefined for R6: ARIMA
     Sex       Method Year
    Male ARIMA(3,1,2) 2050
  Female ARIMA(2,2,2) 2050
@@ -339,8 +334,9 @@ Warning messages:
 
 ==================== Done ====================
 Output directory: outputs/R5
+exit=0
 
-### [3/5] fig/code/make_all_figures.R
+=================== Rscript fig/code/make_all_figures.R
 [ 1/19] Figure 1 2023 snapshot ... OK
 [ 2/19] Figure 2 trends ... OK
 [ 3/19] Figure 3 unweighted mean country ASR and fold change ... OK
@@ -361,9 +357,10 @@ Output directory: outputs/R5
 [18/19] Supplementary Figure 11 IE1.5 age specific ... OK
 [19/19] Supplementary Figure 12 IE1.5 forecast ... OK
 
-Completed 19/19 in 50 s
+Completed 19/19 in 79 s
+exit=0
 
-### [4/5] table/code/make_all_supplementary_tables.R
+=================== Rscript table/code/make_all_supplementary_tables.R
 [ 1/17] Supplementary Table 1 ... OK
 [ 2/17] Supplementary Table 2 ... OK
 [ 3/17] Supplementary Table 3 ... OK
@@ -382,9 +379,10 @@ Completed 19/19 in 50 s
 [16/17] Supplementary Table 16 ... OK
 [17/17] Supplementary Table 17 ... OK
 
-Completed 17/17 in 6.3 s
+Completed 17/17 in 10.4 s
+exit=0
 
-### [5/5] scripts/make_submission_xlsx.R
+=================== Rscript scripts/make_submission_xlsx.R
 [1] "en_US.UTF-8"
 Warning message:
 程辑包‘readr’是用R版本4.2.3 来建造的 
@@ -416,7 +414,4 @@ Output     : outputs/submission_tables_xlsx
   Supplementary Table 17.xlsx    <- R5_joint_simulation_specification.csv + R5_residual_correlation_matrix.csv + R5_correlation_eigenvalues.csv + R5_simulation_nonnegativity.csv [A - Specification: 14 x 2; B - Residual correlation: 6 x 5; C - Eigenvalues: 3 x 4; D - Non-negativity: 27 x 7]
 
 Done: 23 xlsx files; 158 columns written as numeric.
-
-==============================================================================
-Finished: 2026-09-02T12:26:39Z UTC
-==============================================================================
+exit=0

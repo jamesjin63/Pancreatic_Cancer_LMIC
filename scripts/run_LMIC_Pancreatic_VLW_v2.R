@@ -11,7 +11,7 @@
 #   4. All-LMIC prediction intervals use 50,000 joint paths with empirical
 #      residual correlation; subgroup interval endpoints are never summed.
 #   5. Non-seasonal ARIMA is the primary model and damped-trend ETS is the
-#      sensitivity model. Selected by a prespecified rule (lowest pooled
+#      sensitivity model. Selected by a rule predefined for R6 (lowest pooled
 #      rolling-origin MAPE among candidates for which the Ljung-Box test does not detect
 #      residual autocorrelation at the 5% level); see
 #      scripts/run_R5_reviewer_analyses.R.
@@ -870,7 +870,7 @@ for (ie in ie_values) {
     geom_line(data=fc_all %>% filter(type=="Forecast"),colour=pal$red,linewidth=0.7)+
     geom_vline(xintercept=2023,linetype="dashed",colour="grey50",linewidth=0.3)+
     scale_x_continuous(breaks=seq(1990,2050,10))+scale_y_continuous(expand=expansion(mult=c(0,0.05)))+
-    labs(x="Year",y="Total VLW (billion USD)")+theme_nm()
+    labs(x="Year",y="Total VLW (billion constant-2023 USD)")+theme_nm()
   p5b <- ggplot(fc_all,aes(year,D/1e6))+
     geom_ribbon(data=fc_all %>% filter(type=="Forecast"),aes(ymin=Dl/1e6,ymax=Dh/1e6),fill=pal$orange,alpha=0.12)+
     geom_line(data=fc_all %>% filter(type=="Observed"),colour=pal$purple,linewidth=0.7)+
@@ -883,13 +883,13 @@ for (ie in ie_values) {
     geom_ribbon(data=fc_inc2 %>% filter(type=="Forecast"),aes(ymin=Vl,ymax=Vh,fill=LMIC_group),alpha=0.08,colour=NA)+
     geom_line(linewidth=0.6)+geom_vline(xintercept=2023,linetype="dashed",colour="grey50",linewidth=0.3)+
     scale_colour_manual(values=income_pal,name="Income Group")+scale_fill_manual(values=income_pal,guide="none")+
-    scale_x_continuous(breaks=seq(1990,2050,10))+labs(x="Year",y="VLW (billion USD)")+
+    scale_x_continuous(breaks=seq(1990,2050,10))+labs(x="Year",y="VLW (billion constant-2023 USD)")+
     theme_nm()+theme(legend.position=c(0.25,0.78))
   p5d <- ggplot(fc_sex,aes(year,V,colour=sex_name))+
     geom_ribbon(data=fc_sex %>% filter(type=="Forecast"),aes(ymin=Vl,ymax=Vh,fill=sex_name),alpha=0.08,colour=NA)+
     geom_line(linewidth=0.6)+geom_vline(xintercept=2023,linetype="dashed",colour="grey50",linewidth=0.3)+
     scale_colour_manual(values=sex_pal,name="Sex")+scale_fill_manual(values=sex_pal,guide="none")+
-    scale_x_continuous(breaks=seq(1990,2050,10))+labs(x="Year",y="VLW (billion USD)")+
+    scale_x_continuous(breaks=seq(1990,2050,10))+labs(x="Year",y="VLW (billion constant-2023 USD)")+
     theme_nm()+theme(legend.position=c(0.2,0.82))
   pdf(file.path(ie_dir,"Figure5_forecast_2050.pdf"),width=9,height=7)
   print((p5a|p5b)/(p5c|p5d)+plot_annotation(tag_levels="a")&theme(plot.tag=element_text(size=10,face="bold"))); dev.off()
